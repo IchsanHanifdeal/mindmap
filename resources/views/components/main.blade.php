@@ -57,6 +57,35 @@
         <div id="toast-container" class="fixed z-50 space-y-4 top-5 right-5"></div>
 
         <script>
+        function showLoginAlert() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Anda Belum Login',
+                html: `
+                <p class="text-gray-600 mb-2">
+                    Untuk mengakses fitur ini, silakan login terlebih dahulu.
+                </p>
+            `,
+                footer: '<span class="text-sm text-gray-500">Akses hanya tersedia untuk pengguna terdaftar</span>',
+                confirmButtonText: 'Login Sekarang',
+                confirmButtonColor: '#123f77',
+                cancelButtonColor: '#d33',
+                background: '#fff',
+                customClass: {
+                    popup: 'rounded-xl',
+                    confirmButton: 'px-4 py-2 text-base',
+                    cancelButton: 'px-4 py-2 text-base'
+                },
+                buttonsStyling: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{{ route('login') }}";
+                }
+            });
+        }
+    </script>
+
+        <script>
             function showToast(message, type) {
                 const toastContainer = document.getElementById('toast-container');
                 const toast = document.createElement('div');
