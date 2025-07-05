@@ -12,12 +12,12 @@
                 interaktif.
             </p>
             <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-                <a href="{{ route('mindmap') }}"
+                <button id="startMindmapBtn"
                     class="btn bg-[#123f77] hover:bg-[#0f86b6] text-white font-semibold px-6 py-3 rounded-xl">
                     Mulai Mindmap Baru
-                </a>
+                </button>
             </div>
+
         </div>
     </section>
-
 </x-main>

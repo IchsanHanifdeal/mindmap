@@ -14,7 +14,7 @@
                 </label>
 
                 <!-- Logo -->
-                @unless (request()->is('mindmap*'))
+                @unless (request()->is('mindmap/*'))
                     <a href="{{ route('beranda') }}" class="btn btn-ghost text-xl font-bold text-[#123f77] gap-2">
                         <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-8 w-auto" />
                         Mindmapku
@@ -41,8 +41,7 @@
                             </summary>
                             <ul class="dropdown-content menu p-2 bg-white shadow rounded-box w-52 border">
                                 <li>
-                                    <a href="{{ route('mindmap') }}"
-                                        class="{{ request()->routeIs('mindmap') ? 'bg-[#f0f6ff] font-semibold' : '' }}">
+                                    <a href="#" id="startMindmapBtnNavbar">
                                         <x-lucide-pen-tool class="w-4 h-4" /> Buat Mindmap
                                     </a>
                                 </li>
@@ -55,10 +54,10 @@
                                             class="{{ request()->routeIs('materi') ? 'bg-[#f0f6ff] font-semibold' : '' }}">
                                             <x-lucide-book-open class="w-4 h-4" /> Materi
                                         </a></li>
-                                    <li><a href="{{ route('ringkasan') }}"
+                                    {{-- <li><a href="{{ route('ringkasan') }}"
                                             class="{{ request()->routeIs('ringkasan') ? 'bg-[#f0f6ff] font-semibold' : '' }}">
                                             <x-lucide-list class="w-4 h-4" /> Ringkasan
-                                        </a></li>
+                                        </a></li> --}}
                                 @else
                                     <li><a href="#" onclick="showLoginAlert()">
                                             <x-lucide-bookmark class="w-4 h-4" /> Mindmap Tersimpan
@@ -66,9 +65,9 @@
                                     <li><a href="#" onclick="showLoginAlert()">
                                             <x-lucide-book-open class="w-4 h-4" /> Materi
                                         </a></li>
-                                    <li><a href="#" onclick="showLoginAlert()">
+                                    {{-- <li><a href="#" onclick="showLoginAlert()">
                                             <x-lucide-list class="w-4 h-4" /> Ringkasan
-                                        </a></li>
+                                        </a></li> --}}
                                 @endauth
                             </ul>
                         </details>
@@ -99,13 +98,27 @@
                     <a href="{{ route('login') }}"
                         class="btn bg-[#123f77] hover:bg-[#0f86b6] text-white font-semibold">Masuk</a>
                 @else
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                            class="btn btn-outline border-[#123f77] text-[#123f77] hover:bg-[#f0f6ff] flex items-center gap-2">
-                            <x-lucide-log-out class="w-4 h-4" /> Logout
-                        </button>
-                    </form>
+                    <details class="dropdown dropdown-end">
+                        <summary
+                            class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-[#f0f6ff] cursor-pointer list-none">
+                            <x-lucide-user class="w-4 h-4" />
+                            Hi, {{ Auth::user()->name }}
+                            <x-lucide-chevron-down class="w-4 h-4 ml-1" />
+                        </summary>
+                        <ul class="dropdown-content z-50 menu p-2 mt-2 shadow bg-white border rounded-box w-52">
+                            <li>
+                                <button type="button" onclick="confirmLogout()"
+                                    class="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-[#fef2f2] text-red-600 rounded-md">
+                                    <x-lucide-log-out class="w-4 h-4" /> Logout
+                                </button>
+
+                                <form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
+                                    @csrf
+                                </form>
+                            </li>
+                        </ul>
+                    </details>
+
                 @endguest
             </div>
         </div>
@@ -126,8 +139,7 @@
                     <summary><x-lucide-layers class="w-4 h-4" /> Fitur</summary>
                     <ul>
                         <li>
-                            <a href="{{ route('mindmap') }}"
-                                class="{{ request()->routeIs('mindmap') ? 'bg-[#f0f6ff] font-semibold rounded-md' : '' }}">
+                            <a href="#" id="startMindmapBtnNavbar">
                                 <x-lucide-pen-tool class="w-4 h-4" /> Buat Mindmap
                             </a>
                         </li>
@@ -140,17 +152,19 @@
                                     class="{{ request()->routeIs('materi') ? 'bg-[#f0f6ff] font-semibold rounded-md' : '' }}">
                                     <x-lucide-book-open class="w-4 h-4" /> Materi
                                 </a></li>
-                            <li><a href="{{ route('ringkasan') }}"
+                            {{-- <li><a href="{{ route('ringkasan') }}"
                                     class="{{ request()->routeIs('ringkasan') ? 'bg-[#f0f6ff] font-semibold rounded-md' : '' }}">
                                     <x-lucide-list class="w-4 h-4" /> Ringkasan
-                                </a></li>
+                                </a></li> --}}
                         @else
-                            <li><a href="#" onclick="showLoginAlert()"><x-lucide-bookmark class="w-4 h-4" /> Mindmap
+                            <li><a href="#" onclick="showLoginAlert()"><x-lucide-bookmark class="w-4 h-4" />
+                                    Mindmap
                                     Tersimpan</a></li>
                             <li><a href="#" onclick="showLoginAlert()"><x-lucide-book-open class="w-4 h-4" />
                                     Materi</a></li>
-                            <li><a href="#" onclick="showLoginAlert()"><x-lucide-list class="w-4 h-4" /> Ringkasan</a>
-                            </li>
+                            {{-- <li><a href="#" onclick="showLoginAlert()"><x-lucide-list class="w-4 h-4" />
+                                    Ringkasan</a>
+                            </li> --}}
                         @endauth
                     </ul>
                 </details>
@@ -188,3 +202,22 @@
         </ul>
     </div>
 </div>
+
+<script>
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Yakin ingin logout?',
+            text: 'Anda akan keluar dari sesi saat ini.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, logout',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logout-form').submit();
+            }
+        });
+    }
+</script>

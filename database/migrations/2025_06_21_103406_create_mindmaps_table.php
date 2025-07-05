@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('mindmaps', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user');
+            $table->foreign('user')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('title');
+            $table->string('node');
+            $table->string('parent_node')->nullable();
+            $table->string('gambar_mindmap')->nullable();
+            $table->string('ringkasan_pribadi')->nullable();
+            $table->enum('type', ['brace', 'bubble', 'flow', 'multi', 'spider'])->nullable();
+            $table->enum('shareable', ['yes', 'no'])->default('no');
             $table->timestamps();
         });
     }

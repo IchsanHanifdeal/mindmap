@@ -6,12 +6,11 @@
 
         <div>
             <!-- Title -->
-            <div x-data="mindmapSidebar" class="pb-4 border-b border-[#123f77]">
-                <div class="flex justify-between items-center">
-                    <span x-text="mindmapTitle" class="text-xl font-bold cursor-pointer" @click="editTitle()"></span>
-                    <button class="btn btn-sm btn-outline border-[#123f77] text-[#123f77] hover:bg-[#f0f6ff]"
-                        @click="editTitle()">Ubah</button>
-                </div>
+            <div class="flex items-center justify-center mb-4 pb-4 border-b border-base-300 gap-x-3">
+                <a href="{{ route('beranda') }}" class="btn btn-ghost text-2xl font-bold text-[#123f77] gap-2">
+                    <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-8 w-auto" />
+                    Mindmapku
+                </a>
             </div>
 
             <!-- NODE SECTION -->
@@ -25,7 +24,8 @@
             <!-- PROSES -->
             <span class="label text-xs font-bold mt-4">PROSES</span>
             <li>
-                <button type="button" id="btn-generate-summary" class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
+                <button type="button" id="btn-generate-summary"
+                    class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
                     <x-lucide-brain-circuit class="w-5 h-5 stroke-2" /> Generate Ringkasan
                 </button>
             </li>
@@ -45,8 +45,16 @@
             <li><button data-action="zoom-out" class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
                     <x-lucide-zoom-out class="w-5 h-5 stroke-2" /> Zoom Out
                 </button></li>
-            <li><button class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
-                    <x-lucide-save class="w-5 h-5 stroke-2" /> Simpan Mindmap</button></li>
+            <li>
+                @auth
+                    <button id="btn-save-mindmap" class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
+                        <x-lucide-save class="w-5 h-5 stroke-2" /> Simpan Mindmap
+                    </button>
+                @else
+                    <button onclick="showLoginAlert()" class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
+                        <x-lucide-save class="w-5 h-5 stroke-2" /> Simpan Mindmap</button>
+                @endauth
+            </li>
 
             <!-- LAINNYA -->
             <span class="label text-xs font-bold mt-4">LAINNYA</span>
