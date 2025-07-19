@@ -1,17 +1,19 @@
-<x-mindmap.main title="Brace Mindmap" class="p-0">
-    <div class="flex w-full h-screen">
-        <div id="jsmind_container"
-            class="relative flex-1 overflow-auto bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.1)_1px,transparent_1px)]">
+<x-mindmap.main title="Brace Mindmap" class="!p-0">
+    <div class="flex w-full h-screen relative">
 
-            <div class="absolute top-2 right-2 w-48 h-48 bg-white p-2 rounded shadow-md cursor-pointer z-50"
-                onclick="showImageModal('{{ asset('img/spider.png') }}')">
-                <img src="{{ asset('img/spider.png') }}" alt="Gambar"
-                    class="w-full h-full object-contain transition-transform duration-200 hover:scale-105" />
-            </div>
-
+        <div class="absolute top-2 right-2 w-48 h-48 bg-white p-2 rounded shadow-md cursor-pointer z-50"
+            onclick="showImageModal('{{ asset('img/spider.png') }}')">
+            <img src="{{ asset('img/spider.png') }}" alt="Gambar"
+                class="w-full h-full object-contain transition-transform duration-200 hover:scale-105" />
         </div>
+
+        <div id="jsmind_container"
+            class="flex-1 overflow-hidden bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.1)_1px,transparent_1px)]">
+        </div>
+
     </div>
 </x-mindmap.main>
+
 
 <script src="https://unpkg.com/cytoscape@3.28.0/dist/cytoscape.min.js"></script>
 <script>
@@ -146,82 +148,46 @@
     cy.on('tap', 'node', async function(evt) {
         const node = evt.target;
 
-        if (selectedNode && selectedNode.id() !== node.id()) {
-
-            if (selectedNode.removed() || node.removed()) {
-                selectedNode = null;
-                return;
-            }
-
+        if (evt.originalEvent.detail === 2) {
             const {
-                value: choice
+                value: newLabel
             } = await Swal.fire({
-                title: 'Pilih Tipe Garis',
-                input: 'select',
-                inputOptions: {
-                    bezier: 'Melengkung (Bezier)',
-                    straight: 'Lurus (Straight)',
-                    'unbundled-bezier': 'Manual Control (Unbundled Bezier)',
-                    segments: 'Segmented Lines',
-                    'round-segments': 'Rounded Segments',
-                    taxi: 'Taxi (Right Angle)',
-                    'round-taxi': 'Taxi Rounded',
-                    dotted: 'Putus-Putus',
-                    dashed: 'Garis Putus Dash'
-                },
-                inputPlaceholder: 'Pilih tipe garis',
+                title: 'Ubah Label Node',
+                input: 'text',
+                inputValue: node.data('label'),
                 showCancelButton: true,
-                confirmButtonText: 'Hubungkan'
+                confirmButtonText: 'Ubah'
             });
 
-            if (!choice) {
-                selectedNode.unselect();
-                selectedNode = null;
-                return;
+            if (newLabel !== undefined) {
+                node.data('label', newLabel);
             }
 
-            const edgeId = `e_${selectedNode.id()}_${node.id()}`;
-            if (cy.getElementById(edgeId).empty()) {
-                let edgeStyle = {
-                    'line-color': '#94a3b8',
-                    'target-arrow-shape': 'triangle',
-                    'target-arrow-color': '#94a3b8',
-                    'width': 2,
-                    'line-style': 'solid',
-                    'curve-style': choice
-                };
-
-                if (choice === 'dotted' || choice === 'dashed') {
-                    edgeStyle['curve-style'] = 'bezier';
-                    edgeStyle['line-style'] = choice === 'dotted' ? 'dotted' : 'dashed';
-                    edgeStyle['line-dash-pattern'] = choice === 'dotted' ? [2, 2] : [6, 3];
-                }
-
+        } else {
+            if (selectedNode && selectedNode.id() !== node.id()) {
+                const edgeId = `e_${selectedNode.id()}_${node.id()}`;
                 cy.add({
                     group: 'edges',
                     data: {
                         id: edgeId,
                         source: selectedNode.id(),
                         target: node.id()
-                    },
-                    style: edgeStyle
+                    }
                 });
+                selectedNode.unselect();
+                selectedNode = null;
+            } else {
+                cy.nodes().unselect();
+                node.select();
+                selectedNode = node;
             }
-
-            selectedNode.unselect();
-            selectedNode = null;
-
-        } else {
-            cy.nodes().unselect();
-            node.select();
-            selectedNode = node;
         }
     });
 
     cy.on('tap', 'edge', async function(evt) {
         const edge = evt.target;
 
-        if (edge.removed()) return;
+        if (!edge?.length || edge.removed()) return;
 
         const {
             value: action
@@ -250,8 +216,8 @@
                 title: 'Pilih Tipe Garis Baru',
                 input: 'select',
                 inputOptions: {
-                    bezier: 'Melengkung (Bezier)',
                     straight: 'Lurus (Straight)',
+                    bezier: 'Melengkung (Bezier)',
                     dotted: 'Putus-Putus',
                     dashed: 'Garis Putus Dash'
                 },
@@ -267,6 +233,12 @@
                     'curve-style': 'bezier',
                     'line-style': styleChoice === 'dotted' ? 'dotted' : 'dashed',
                     'line-dash-pattern': styleChoice === 'dotted' ? [2, 2] : [6, 3]
+                });
+            } else if (styleChoice === 'bezier') {
+                edge.style({
+                    'curve-style': 'unbundled-bezier',
+                    'line-style': 'solid',
+                    'line-dash-pattern': []
                 });
             } else {
                 edge.style({
