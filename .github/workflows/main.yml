@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - production
+  workflow_dispatch:
 
 name: 🚀 Deploy using FTP
 
@@ -13,10 +14,15 @@ jobs:
       - name: 🚚 Get latest code
         uses: actions/checkout@v3
 
-      - name: Use Node 18
-        uses: actions/setup-node@v2
+      - name: Use Node 22
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
 
       - name: 🔨 Build Project
         run: |
