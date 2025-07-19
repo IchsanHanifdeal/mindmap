@@ -125,7 +125,8 @@
                         flow: 'Flow Map',
                         multi: 'Multi-flow Map',
                         bubble: 'Bubble Map',
-                        brace: 'Brace Map'
+                        brace: 'Brace Map',
+                        custom: 'Custom Map'
                     },
                     inputPlaceholder: 'Pilih satu jenis',
                     showCancelButton: true,

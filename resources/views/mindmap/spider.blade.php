@@ -1,17 +1,19 @@
-<x-mindmap.main title="Brace Mindmap" class="p-0">
-    <div class="flex w-full h-screen">
-        <div id="jsmind_container"
-            class="relative flex-1 overflow-auto bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.1)_1px,transparent_1px)]">
+<x-mindmap.main title="Brace Mindmap" class="!p-0">
+    <div class="flex w-full h-screen relative">
 
-            <div class="absolute top-2 right-2 w-48 h-48 bg-white p-2 rounded shadow-md cursor-pointer z-50"
-                onclick="showImageModal('{{ asset('img/spider.png') }}')">
-                <img src="{{ asset('img/spider.png') }}" alt="Gambar"
-                    class="w-full h-full object-contain transition-transform duration-200 hover:scale-105" />
-            </div>
-
+        <div class="absolute top-2 right-2 w-48 h-48 bg-white p-2 rounded shadow-md cursor-pointer z-50"
+            onclick="showImageModal('{{ asset('img/spider.png') }}')">
+            <img src="{{ asset('img/spider.png') }}" alt="Gambar"
+                class="w-full h-full object-contain transition-transform duration-200 hover:scale-105" />
         </div>
+
+        <div id="jsmind_container"
+            class="flex-1 overflow-hidden bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.1)_1px,transparent_1px)]">
+        </div>
+
     </div>
 </x-mindmap.main>
+
 
 <script src="https://unpkg.com/cytoscape@3.28.0/dist/cytoscape.min.js"></script>
 <script>
@@ -178,6 +180,72 @@
                 cy.nodes().unselect();
                 node.select();
                 selectedNode = node;
+            }
+        }
+    });
+
+    cy.on('tap', 'edge', async function(evt) {
+        const edge = evt.target;
+
+        if (!edge?.length || edge.removed()) return;
+
+        const {
+            value: action
+        } = await Swal.fire({
+            title: 'Aksi Koneksi',
+            input: 'select',
+            inputOptions: {
+                delete: '🗑️ Hapus Garis',
+                style: '🎨 Ubah Tipe Garis'
+            },
+            inputPlaceholder: 'Pilih aksi',
+            showCancelButton: true,
+            confirmButtonText: 'Lanjut'
+        });
+
+        if (!action) return;
+
+        if (action === 'delete') {
+            cy.remove(edge);
+        }
+
+        if (action === 'style') {
+            const {
+                value: styleChoice
+            } = await Swal.fire({
+                title: 'Pilih Tipe Garis Baru',
+                input: 'select',
+                inputOptions: {
+                    straight: 'Lurus (Straight)',
+                    bezier: 'Melengkung (Bezier)',
+                    dotted: 'Putus-Putus',
+                    dashed: 'Garis Putus Dash'
+                },
+                inputPlaceholder: 'Pilih tipe',
+                showCancelButton: true,
+                confirmButtonText: 'Ubah'
+            });
+
+            if (!styleChoice) return;
+
+            if (styleChoice === 'dotted' || styleChoice === 'dashed') {
+                edge.style({
+                    'curve-style': 'bezier',
+                    'line-style': styleChoice === 'dotted' ? 'dotted' : 'dashed',
+                    'line-dash-pattern': styleChoice === 'dotted' ? [2, 2] : [6, 3]
+                });
+            } else if (styleChoice === 'bezier') {
+                edge.style({
+                    'curve-style': 'unbundled-bezier',
+                    'line-style': 'solid',
+                    'line-dash-pattern': []
+                });
+            } else {
+                edge.style({
+                    'curve-style': styleChoice,
+                    'line-style': 'solid',
+                    'line-dash-pattern': []
+                });
             }
         }
     });
@@ -438,6 +506,24 @@
         } catch (err) {
             console.error(err);
             Swal.fire('Gagal', 'Terjadi kesalahan saat menyimpan mindmap.', 'error');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (!selectedNode) return;
+
+        const currentSize = selectedNode.data('height') || 60;
+        const fontSize = parseInt(selectedNode.style('font-size')) || 14;
+
+        if (e.shiftKey && e.key === '+') {
+            e.preventDefault();
+            selectedNode.data('height', currentSize + 10);
+            selectedNode.style('font-size', (fontSize + 2) + 'px');
+        }
+        if (e.shiftKey && (e.key === '-' || e.key === '_')) {
+            e.preventDefault();
+            selectedNode.data('height', Math.max(30, currentSize - 10));
+            selectedNode.style('font-size', Math.max(8, fontSize - 2) + 'px');
         }
     });
 </script>

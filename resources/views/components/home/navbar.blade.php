@@ -42,32 +42,25 @@
                             <ul class="dropdown-content menu p-2 bg-white shadow rounded-box w-52 border">
                                 <li>
                                     <a href="#" id="startMindmapBtnNavbar">
-                                        <x-lucide-pen-tool class="w-4 h-4" /> Buat Mindmap
+                                        <x-lucide-pen-tool class="w-4 h-4" /> Inview
                                     </a>
                                 </li>
                                 @auth
-                                    <li><a href="{{ route('mindmap.saved') }}"
-                                            class="{{ request()->routeIs('mindmap.saved') ? 'bg-[#f0f6ff] font-semibold' : '' }}">
-                                            <x-lucide-bookmark class="w-4 h-4" /> Mindmap Tersimpan
-                                        </a></li>
                                     <li><a href="{{ route('materi') }}"
                                             class="{{ request()->routeIs('materi') ? 'bg-[#f0f6ff] font-semibold' : '' }}">
                                             <x-lucide-book-open class="w-4 h-4" /> Materi
                                         </a></li>
-                                    {{-- <li><a href="{{ route('ringkasan') }}"
-                                            class="{{ request()->routeIs('ringkasan') ? 'bg-[#f0f6ff] font-semibold' : '' }}">
-                                            <x-lucide-list class="w-4 h-4" /> Ringkasan
-                                        </a></li> --}}
-                                @else
-                                    <li><a href="#" onclick="showLoginAlert()">
-                                            <x-lucide-bookmark class="w-4 h-4" /> Mindmap Tersimpan
+                                    <li><a href="{{ route('mindmap.saved') }}"
+                                            class="{{ request()->routeIs('mindmap.saved') ? 'bg-[#f0f6ff] font-semibold' : '' }}">
+                                            <x-lucide-bookmark class="w-4 h-4" /> Review
                                         </a></li>
+                                @else
                                     <li><a href="#" onclick="showLoginAlert()">
                                             <x-lucide-book-open class="w-4 h-4" /> Materi
                                         </a></li>
-                                    {{-- <li><a href="#" onclick="showLoginAlert()">
-                                            <x-lucide-list class="w-4 h-4" /> Ringkasan
-                                        </a></li> --}}
+                                    <li><a href="#" onclick="showLoginAlert()">
+                                            <x-lucide-bookmark class="w-4 h-4" /> Review
+                                        </a></li>
                                 @endauth
                             </ul>
                         </details>
@@ -144,27 +137,27 @@
                             </a>
                         </li>
                         @auth
-                            <li><a href="{{ route('mindmap.saved') }}"
-                                    class="{{ request()->routeIs('mindmap.saved') ? 'bg-[#f0f6ff] font-semibold rounded-md' : '' }}">
-                                    <x-lucide-bookmark class="w-4 h-4" /> Mindmap Tersimpan
-                                </a></li>
-                            <li><a href="{{ route('materi') }}"
+                            <li>
+                                <a href="{{ route('materi') }}"
                                     class="{{ request()->routeIs('materi') ? 'bg-[#f0f6ff] font-semibold rounded-md' : '' }}">
                                     <x-lucide-book-open class="w-4 h-4" /> Materi
-                                </a></li>
-                            {{-- <li><a href="{{ route('ringkasan') }}"
-                                    class="{{ request()->routeIs('ringkasan') ? 'bg-[#f0f6ff] font-semibold rounded-md' : '' }}">
-                                    <x-lucide-list class="w-4 h-4" /> Ringkasan
-                                </a></li> --}}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('mindmap.saved') }}"
+                                    class="{{ request()->routeIs('mindmap.saved') ? 'bg-[#f0f6ff] font-semibold rounded-md' : '' }}">
+                                    <x-lucide-bookmark class="w-4 h-4" /> Review
+                                </a>
+                            </li>
                         @else
-                            <li><a href="#" onclick="showLoginAlert()"><x-lucide-bookmark class="w-4 h-4" />
-                                    Mindmap
-                                    Tersimpan</a></li>
-                            <li><a href="#" onclick="showLoginAlert()"><x-lucide-book-open class="w-4 h-4" />
-                                    Materi</a></li>
-                            {{-- <li><a href="#" onclick="showLoginAlert()"><x-lucide-list class="w-4 h-4" />
-                                    Ringkasan</a>
-                            </li> --}}
+                            <li>
+                                <a href="#" onclick="showLoginAlert()"><x-lucide-book-open class="w-4 h-4" />
+                                    Materi</a>
+                            </li>
+                            <li>
+                                <a href="#" onclick="showLoginAlert()">
+                                    <x-lucide-bookmark class="w-4 h-4" />Review</a>
+                            </li>
                         @endauth
                     </ul>
                 </details>

@@ -15,6 +15,7 @@ Route::get('/mindmap/bubble', [MindmapController::class, 'bubble'])->name('mindm
 Route::get('/mindmap/flow', [MindmapController::class, 'flow'])->name('mindmap.flow');
 Route::get('/mindmap/multi', [MindmapController::class, 'multi'])->name('mindmap.multi');
 Route::get('/mindmap/spider', [MindmapController::class, 'spider'])->name('mindmap.spider');
+Route::get('/mindmap/custom', [MindmapController::class, 'custom'])->name('mindmap.custom');
 
 Route::post('mindmap/generate-summary', [MindmapController::class, 'generateSummary'])->name('mindmap.generateSummary');
 

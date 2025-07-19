@@ -23,12 +23,12 @@
 
             <!-- PROSES -->
             <span class="label text-xs font-bold mt-4">PROSES</span>
-            <li>
+            {{-- <li>
                 <button type="button" id="btn-generate-summary"
                     class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
                     <x-lucide-brain-circuit class="w-5 h-5 stroke-2" /> Generate Ringkasan
                 </button>
-            </li>
+            </li> --}}
 
             <li>
                 <button id="btn-export-png" class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
