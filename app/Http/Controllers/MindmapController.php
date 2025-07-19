@@ -41,6 +41,10 @@ class MindmapController extends Controller
         return view('mindmap.spider');
     }
 
+    public function custom()
+    {
+        return view('mindmap.custom');
+    }
     /**
      * Show the form for creating a new resource.
      */

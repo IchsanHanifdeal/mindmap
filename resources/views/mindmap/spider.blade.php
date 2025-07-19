@@ -146,38 +146,134 @@
     cy.on('tap', 'node', async function(evt) {
         const node = evt.target;
 
-        if (evt.originalEvent.detail === 2) {
-            const {
-                value: newLabel
-            } = await Swal.fire({
-                title: 'Ubah Label Node',
-                input: 'text',
-                inputValue: node.data('label'),
-                showCancelButton: true,
-                confirmButtonText: 'Ubah'
-            });
+        if (selectedNode && selectedNode.id() !== node.id()) {
 
-            if (newLabel !== undefined) {
-                node.data('label', newLabel);
+            if (selectedNode.removed() || node.removed()) {
+                selectedNode = null;
+                return;
             }
 
-        } else {
-            if (selectedNode && selectedNode.id() !== node.id()) {
-                const edgeId = `e_${selectedNode.id()}_${node.id()}`;
+            const {
+                value: choice
+            } = await Swal.fire({
+                title: 'Pilih Tipe Garis',
+                input: 'select',
+                inputOptions: {
+                    bezier: 'Melengkung (Bezier)',
+                    straight: 'Lurus (Straight)',
+                    'unbundled-bezier': 'Manual Control (Unbundled Bezier)',
+                    segments: 'Segmented Lines',
+                    'round-segments': 'Rounded Segments',
+                    taxi: 'Taxi (Right Angle)',
+                    'round-taxi': 'Taxi Rounded',
+                    dotted: 'Putus-Putus',
+                    dashed: 'Garis Putus Dash'
+                },
+                inputPlaceholder: 'Pilih tipe garis',
+                showCancelButton: true,
+                confirmButtonText: 'Hubungkan'
+            });
+
+            if (!choice) {
+                selectedNode.unselect();
+                selectedNode = null;
+                return;
+            }
+
+            const edgeId = `e_${selectedNode.id()}_${node.id()}`;
+            if (cy.getElementById(edgeId).empty()) {
+                let edgeStyle = {
+                    'line-color': '#94a3b8',
+                    'target-arrow-shape': 'triangle',
+                    'target-arrow-color': '#94a3b8',
+                    'width': 2,
+                    'line-style': 'solid',
+                    'curve-style': choice
+                };
+
+                if (choice === 'dotted' || choice === 'dashed') {
+                    edgeStyle['curve-style'] = 'bezier';
+                    edgeStyle['line-style'] = choice === 'dotted' ? 'dotted' : 'dashed';
+                    edgeStyle['line-dash-pattern'] = choice === 'dotted' ? [2, 2] : [6, 3];
+                }
+
                 cy.add({
                     group: 'edges',
                     data: {
                         id: edgeId,
                         source: selectedNode.id(),
                         target: node.id()
-                    }
+                    },
+                    style: edgeStyle
                 });
-                selectedNode.unselect();
-                selectedNode = null;
+            }
+
+            selectedNode.unselect();
+            selectedNode = null;
+
+        } else {
+            cy.nodes().unselect();
+            node.select();
+            selectedNode = node;
+        }
+    });
+
+    cy.on('tap', 'edge', async function(evt) {
+        const edge = evt.target;
+
+        if (edge.removed()) return;
+
+        const {
+            value: action
+        } = await Swal.fire({
+            title: 'Aksi Koneksi',
+            input: 'select',
+            inputOptions: {
+                delete: '🗑️ Hapus Garis',
+                style: '🎨 Ubah Tipe Garis'
+            },
+            inputPlaceholder: 'Pilih aksi',
+            showCancelButton: true,
+            confirmButtonText: 'Lanjut'
+        });
+
+        if (!action) return;
+
+        if (action === 'delete') {
+            cy.remove(edge);
+        }
+
+        if (action === 'style') {
+            const {
+                value: styleChoice
+            } = await Swal.fire({
+                title: 'Pilih Tipe Garis Baru',
+                input: 'select',
+                inputOptions: {
+                    bezier: 'Melengkung (Bezier)',
+                    straight: 'Lurus (Straight)',
+                    dotted: 'Putus-Putus',
+                    dashed: 'Garis Putus Dash'
+                },
+                inputPlaceholder: 'Pilih tipe',
+                showCancelButton: true,
+                confirmButtonText: 'Ubah'
+            });
+
+            if (!styleChoice) return;
+
+            if (styleChoice === 'dotted' || styleChoice === 'dashed') {
+                edge.style({
+                    'curve-style': 'bezier',
+                    'line-style': styleChoice === 'dotted' ? 'dotted' : 'dashed',
+                    'line-dash-pattern': styleChoice === 'dotted' ? [2, 2] : [6, 3]
+                });
             } else {
-                cy.nodes().unselect();
-                node.select();
-                selectedNode = node;
+                edge.style({
+                    'curve-style': styleChoice,
+                    'line-style': 'solid',
+                    'line-dash-pattern': []
+                });
             }
         }
     });
@@ -438,6 +534,24 @@
         } catch (err) {
             console.error(err);
             Swal.fire('Gagal', 'Terjadi kesalahan saat menyimpan mindmap.', 'error');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (!selectedNode) return;
+
+        const currentSize = selectedNode.data('height') || 60;
+        const fontSize = parseInt(selectedNode.style('font-size')) || 14;
+
+        if (e.shiftKey && e.key === '+') {
+            e.preventDefault();
+            selectedNode.data('height', currentSize + 10);
+            selectedNode.style('font-size', (fontSize + 2) + 'px');
+        }
+        if (e.shiftKey && (e.key === '-' || e.key === '_')) {
+            e.preventDefault();
+            selectedNode.data('height', Math.max(30, currentSize - 10));
+            selectedNode.style('font-size', Math.max(8, fontSize - 2) + 'px');
         }
     });
 </script>
