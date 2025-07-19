@@ -81,11 +81,11 @@
                                             </button>
                                         </div>
 
-                                        <div class="tooltip" data-tip="Buat Ringkasan">
+                                        <div class="tooltip" data-tip="Buat Ringkasan dari AI">
                                             <button type="button"
-                                                onclick="buatRingkasan({{ $map->id }}, @js($map->ringkasan_pribadi ?? '') )"
+                                                onclick="generateRingkasan({{ $map->id }}, @js($map->ringkasan_pribadi ?? '') )"
                                                 class="btn btn-sm btn-secondary flex items-center gap-1">
-                                                <x-lucide-pencil-line class="w-4 h-4" />
+                                                <x-lucide-bot class="w-4 h-4" />
                                             </button>
                                         </div>
                                     </div>
@@ -185,20 +185,31 @@
 
     function lihatDetail(data) {
         Swal.fire({
-            title: data.title,
+            title: `<span class="text-[#123f77] font-bold text-lg">${data.title}</span>`,
             html: `
-                <div class="text-left text-sm">
-                    <p><strong>Pembuat:</strong> ${data.created_by}</p>
-                    <p><strong>Tipe:</strong> ${data.type ?? '-'}</p>
-                    <p><strong>Shareable:</strong> ${data.shareable === 'yes' ? 'Ya' : 'Tidak'}</p>
-                    <p><strong>Node Root:</strong> ${data.node}</p>
-                    <p><strong>Tanggal dibuat:</strong> ${data.created_at}</p>
-                </div>
-            `,
-            icon: 'info',
-            confirmButtonText: 'Tutup'
+        <div class="text-left space-y-3 text-sm">
+            <div class="alert alert-info shadow-sm">
+                <x-lucide-info class="w-4 h-4 mr-2" />
+                Ini adalah detail mindmap yang tersimpan.
+            </div>
+
+            <div class="border rounded p-3 bg-gray-50">
+                <p><span class="font-semibold text-[#123f77]">👤 Pembuat:</span> ${data.created_by}</p>
+                <p><span class="font-semibold text-[#123f77]">🗂️ Tipe:</span> ${data.type ?? '-'}</p>
+                <p><span class="font-semibold text-[#123f77]">🔗 Shareable:</span> ${data.shareable === 'yes' ? 'Ya' : 'Tidak'}</p>
+                <p><span class="font-semibold text-[#123f77]">🌳 Node Root:</span> ${data.node}</p>
+                <p><span class="font-semibold text-[#123f77]">📅 Tanggal Dibuat:</span> ${data.created_at}</p>
+            </div>
+        </div>
+        `,
+            width: 600,
+            confirmButtonText: 'Tutup',
+            customClass: {
+                htmlContainer: 'text-left'
+            }
         });
     }
+
 
     function toggleShare(id, button) {
         Swal.fire({
@@ -285,52 +296,130 @@
                 const {
                     mindmap,
                     ringkasan_pribadi,
-                    ringkasan_lain
+                    ringkasan_lain,
+                    komentar_lain
                 } = data;
 
                 let html = `
-                <div class="text-left">
-                    <h2 class="font-semibold mb-2">${mindmap.title}</h2>
-                    <p class="text-sm text-gray-500 mb-4">${mindmap.type} oleh ${mindmap.creator} pada ${mindmap.created_at}</p>
-            `;
+    <div class="text-left space-y-4">
+        <div>
+            <h2 class="text-xl font-bold text-[#123f77]">${mindmap.title}</h2>
+            <p class="text-sm text-gray-500">
+                <span class="badge badge-outline mr-2">${mindmap.type}</span>
+                oleh <span class="font-semibold">${mindmap.creator}</span>
+                pada <span class="italic">${mindmap.created_at}</span>
+            </p>
+        </div>
+    `;
 
                 if (ringkasan_pribadi) {
                     html += `
-                    <p class="font-semibold mb-2">Ringkasan Pribadi Anda:</p>
-                    <div class="bg-gray-100 p-4 rounded-md mb-4">
-                        ${ringkasan_pribadi}
-                    </div>
-                `;
+        <div class="border rounded-lg p-4 bg-blue-50">
+            <p class="font-semibold mb-2 text-[#123f77]">Ringkasan Pribadi Anda</p>
+            <div class="prose text-gray-700">${ringkasan_pribadi}</div>
+        </div>
+    `;
                 }
 
                 if (ringkasan_lain.length > 0) {
-                    html += `<p class="font-semibold mb-2">Ringkasan dari Pengguna Lain:</p>`;
+                    html += `
+        <div class="border rounded-lg p-4 bg-gray-50">
+            <p class="font-semibold mb-2 text-[#123f77]">Ringkasan dari Pengguna Lain</p>
+            <div class="space-y-2">
+    `;
 
                     ringkasan_lain.forEach(item => {
                         html += `
-                        <div class="flex items-baseline gap-2 mb-2">
-                            <strong class="w-20">${item.user}:</strong>
-                            <div class="bg-gray-100 p-2 rounded-md flex-1">
-                                ${item.ringkasan}
-                            </div>
-                        </div>
-                    `;
+            <div class="flex items-start gap-2">
+                <span class="badge badge-primary">${item.user}</span>
+                <div class="bg-white border rounded-md p-2 flex-1 text-gray-700">
+                    ${item.ringkasan}
+                </div>
+            </div>
+        `;
                     });
-                } else {
-                    html += `<p class="text-sm text-gray-500 italic">Tidak ada ringkasan lain.</p>`;
+
+                    html += `</div></div>`;
                 }
 
-                html += `</div>`;
+                html += `
+        <div class="border rounded-lg p-4 bg-gray-50">
+            <p class="font-semibold mb-2 text-[#123f77]">💬 Komentar dari Pengguna Lain</p>
+            <div class="space-y-2 max-h-40 overflow-y-auto">
+    `;
+
+                if (komentar_lain.length > 0) {
+                    komentar_lain.forEach(item => {
+                        html += `
+            <div class="chat chat-start">
+                <div class="chat-header font-semibold">${item.user}</div>
+                <div class="chat-bubble bg-blue-100 text-gray-800">${item.komentar}</div>
+            </div>
+        `;
+                    });
+                } else {
+                    html += `<p class="text-gray-500 italic">Belum ada komentar.</p>`;
+                }
+
+                html += `
+            </div>
+        </div>
+
+        <div class="border rounded-lg p-4 bg-white">
+            <p class="font-semibold mb-2 text-[#123f77]">✏️ Berikan Komentar Anda</p>
+            <textarea id="user-comment" class="textarea textarea-bordered w-full" rows="3" placeholder="Tulis komentar..."></textarea>
+            <button id="submit-comment" class="btn btn-primary mt-2 w-full">Kirim Komentar</button>
+        </div>
+
+    </div>
+    `;
 
                 Swal.fire({
-                    title: 'Ringkasan',
+                    title: 'Ringkasan & Komentar',
                     html: html,
                     width: 700,
-                    icon: 'info',
-                    customClass: {
-                        htmlContainer: 'text-left'
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        document.getElementById('submit-comment').addEventListener('click',
+                            async () => {
+                                const comment = document.getElementById('user-comment').value
+                                    .trim();
+                                if (!comment) {
+                                    return Swal.fire('Oops', 'Komentar tidak boleh kosong.',
+                                        'warning');
+                                }
+
+                                try {
+                                    const res = await fetch(`/mindmap/${mindmapId}/comment`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector(
+                                                    'meta[name="csrf-token"]')
+                                                ?.content || ''
+                                        },
+                                        body: JSON.stringify({
+                                            komentar: comment
+                                        })
+                                    });
+
+                                    if (!res.ok) throw new Error('Gagal mengirim komentar');
+
+                                    Swal.fire('Berhasil', 'Komentar Anda berhasil dikirim.',
+                                        'success').then(() => {
+                                        showRingkasan(mindmapId);
+                                    });
+
+                                } catch (err) {
+                                    console.error(err);
+                                    Swal.fire('Gagal',
+                                        'Terjadi kesalahan saat mengirim komentar.', 'error'
+                                    );
+                                }
+                            });
                     }
                 });
+
             })
             .catch(err => {
                 console.error(err);
@@ -351,5 +440,68 @@
                 popup: 'rounded-xl'
             }
         });
+    }
+
+    function generateRingkasan(id) {
+        Swal.fire({
+            title: 'Menghasilkan Ringkasan AI...',
+            html: '<div class="text-gray-600">Sedang memproses mindmap, mohon tunggu...</div>',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        fetch(`/mindmap/${id}/generate-summary`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+
+                const lines = data.summary.split('\n').map(l => l.trim()).filter(Boolean);
+
+                let topicUtama = '',
+                    subtopik = '',
+                    ringkasanUmum = '';
+                lines.forEach(line => {
+                    if (line.toLowerCase().startsWith('topik utama')) topicUtama = line.replace(
+                        /^Topik utama:\s*/i, '');
+                    else if (line.toLowerCase().startsWith('subtopik')) subtopik = line.replace(
+                        /^Subtopik:\s*/i, '');
+                    else if (line.toLowerCase().startsWith('ringkasan umum')) ringkasanUmum = line.replace(
+                        /^Ringkasan umum:\s*/i, '');
+                });
+
+                Swal.fire({
+                    title: '<span class="text-[#123f77] font-bold">💡 Hasil Ringkasan AI</span>',
+                    html: `
+                <div class="text-left space-y-4">
+                    <div class="alert alert-info shadow-sm text-sm">
+                        <x-lucide-info class="w-4 h-4 mr-2" />
+                        Ini adalah ringkasan otomatis dari AI, gunakan sebagai referensi belajar.
+                    </div>
+
+                    <div class="border rounded p-3 bg-blue-50">
+                        <h3 class="font-semibold text-[#123f77] mb-1">📝 Topik Utama</h3>
+                        <p class="text-gray-800">${topicUtama || '<em>Tidak ditemukan</em>'}</p>
+                    </div>
+
+                    <div class="border rounded p-3 bg-gray-50">
+                        <h3 class="font-semibold text-[#123f77] mb-1">📋 Subtopik</h3>
+                        <p class="text-gray-800">${subtopik || '<em>Tidak ditemukan</em>'}</p>
+                    </div>
+
+                    <div class="border rounded p-3 bg-white">
+                        <h3 class="font-semibold text-[#123f77] mb-1">📖 Ringkasan Umum</h3>
+                        <p class="text-gray-800">${ringkasanUmum || '<em>Tidak ditemukan</em>'}</p>
+                    </div>
+                </div>
+                `,
+                    width: 750,
+                    confirmButtonText: 'Selesai'
+                });
+
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Gagal', err.message || 'Terjadi kesalahan saat memproses.', 'error');
+            });
     }
 </script>

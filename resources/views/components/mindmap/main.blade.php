@@ -42,3 +42,44 @@
     </div>
 
 </x-main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (window.innerWidth >= 1024) {
+            await Swal.fire({
+                title: '👋 Selamat Datang!',
+                text: 'Mari belajar membuat mindmap dengan mudah.',
+                icon: 'info',
+                confirmButtonText: 'Mulai Panduan'
+            });
+
+            await Swal.fire({
+                title: '📝 Langkah 1: Tambahkan Node',
+                html: 'Klik tombol <b>Tambah Node</b> atau tekan <kbd>Shift + N</kbd> di keyboard untuk menambahkan ide atau konsep.',
+                icon: 'question',
+                confirmButtonText: 'Lanjut'
+            });
+
+            await Swal.fire({
+                title: '🔗 Langkah 2: Hubungkan Node',
+                html: 'Klik pada satu node, lalu klik node lainnya untuk membuat garis penghubung. Pilih tipe garis sesuai kebutuhan.',
+                icon: 'question',
+                confirmButtonText: 'Lanjut'
+            });
+
+            await Swal.fire({
+                title: '🖊️ Langkah 3: Ubah & Atur',
+                html: 'Klik dua kali pada node untuk mengubah label. Gunakan tombol <kbd>+</kbd> dan <kbd>-</kbd> (dengan Shift) untuk memperbesar atau memperkecil node.',
+                icon: 'question',
+                confirmButtonText: 'Lanjut'
+            });
+
+            await Swal.fire({
+                title: '💾 Langkah 4: Simpan & Bagikan',
+                html: 'Klik <b>Simpan</b> untuk menyimpan mindmap-mu lengkap dengan ringkasan dan gambar.',
+                icon: 'success',
+                confirmButtonText: 'Selesai'
+            });
+        }
+    });
+</script>

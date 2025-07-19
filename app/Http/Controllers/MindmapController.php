@@ -48,52 +48,58 @@ class MindmapController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function generateSummary(Request $request)
+    public function generateSummary($id)
     {
-        $mindmap = $request->input('mindmap');
+        $mindmapData = Mindmap::where('id', $id)->first();
 
-        if (empty($mindmap) || !is_array($mindmap)) {
-            return response()->json(['error' => 'Mindmap kosong atau tidak valid'], 400);
+        if (!$mindmapData) {
+            return response()->json(['error' => 'Mindmap tidak ditemukan'], 404);
         }
 
-        if (count($mindmap) > 500) {
-            return response()->json(['error' => 'Mindmap terlalu besar untuk diproses. Maksimal 500 node.'], 413);
+        $nodes = Mindmap::where('title', $mindmapData->title)
+            ->where('type', $mindmapData->type)
+            ->where('user', $mindmapData->user)
+            ->get(['node', 'parent_node'])
+            ->toArray();
+
+        if (empty($nodes)) {
+            return response()->json(['error' => 'Data mindmap kosong'], 400);
         }
 
-        $mindmapJson = json_encode($mindmap, JSON_PRETTY_PRINT);
+        if (count($nodes) > 500) {
+            return response()->json(['error' => 'Mindmap terlalu besar (maks 500 node)'], 413);
+        }
+
+        $mindmapJson = json_encode($nodes, JSON_PRETTY_PRINT);
 
         $prompt = <<<EOT
-        Anda adalah asisten AI yang ahli dalam merangkum konten dari mindmap.
-        Berikut adalah data mindmap dalam bentuk JSON. Tolong baca struktur dan buatkan ringkasan singkat dan informatif yang menjelaskan topik utama, subtopik, dan keterkaitan antar ide.
-        Jangan gunakan simbol markdown seperti bintang (*), tanda pagar (#), atau format penekanan teks lainnya. Gunakan teks biasa saja.
-        Format ringkasan (teks biasa, tanpa format khusus):
-            Topik utama: ...
-        Subtopik: ...
-        Ringkasan umum: ...
-        Data mindmap:
-            ```json
-        {$mindmapJson}
-        EOT;
+Anda adalah asisten AI yang ahli dalam merangkum konten dari mindmap.
+Berikut adalah data mindmap dalam bentuk JSON. Tolong baca struktur dan buatkan ringkasan singkat dan informatif yang menjelaskan topik utama, subtopik, dan keterkaitan antar ide.
+Jangan gunakan simbol markdown atau format khusus.
+Format ringkasan:
+Topik utama: ...
+Subtopik: ...
+Ringkasan umum: ...
+Data mindmap:
+```json
+{$mindmapJson}
+EOT;
+
         try {
-            $model = Gemini::generativeModel(model: 'gemini-2.0-flash');
-
-            Log::info("Sending prompt to Gemini", ['length' => strlen($prompt)]);
-
+            $model = Gemini::generativeModel('gemini-2.0-flash');
             $response = $model->generateContent($prompt);
             $summary = $response->text();
 
             return response()->json(['summary' => $summary]);
         } catch (\Throwable $e) {
-            Log::error('Gagal memanggil Gemini API', [
+            Log::error('Gagal generate summary', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
-            return response()->json([
-                'error' => 'Gagal menghasilkan ringkasan: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Gagal menghasilkan ringkasan'], 500);
         }
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -102,6 +108,7 @@ class MindmapController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'summary' => 'nullable|string',
             'type' => 'required|in:brace,bubble,flow,multi,spider',
             'mindmap' => 'required|array|min:1',
             'mindmap.*.node' => 'required|string',
@@ -114,14 +121,12 @@ class MindmapController extends Controller
 
         if ($request->has('image')) {
             try {
-                // Strip data:image/png;base64,...
                 $base64Image = preg_replace('#^data:image/\w+;base64,#i', '', $request->image);
                 $imageData = base64_decode($base64Image);
 
                 $fileName = 'mindmap_' . time() . '_' . uniqid() . '.png';
                 $filePath = storage_path('app/public/mindmaps/' . $fileName);
 
-                // Ensure directory exists
                 if (!file_exists(dirname($filePath))) {
                     mkdir(dirname($filePath), 0755, true);
                 }
@@ -137,6 +142,7 @@ class MindmapController extends Controller
             DB::table('mindmaps')->insert([
                 'user' => $userId,
                 'title' => $request->title,
+                'ringkasan_pribadi' => $request->summary, // ✅ Simpan ringkasan pribadi
                 'node' => $item['node'],
                 'parent_node' => $item['parent_node'],
                 'type' => $request->type,
@@ -163,7 +169,11 @@ class MindmapController extends Controller
             });
         }
 
-        $mindmaps = $query->get();
+        $mindmaps = $query->get()
+            ->unique(function ($item) {
+                return $item->title . '|' . $item->type;
+            })
+            ->values(); // reset key
 
         $ringkasanIds = DB::table('ringkasans')
             ->where('user', Auth::id())
@@ -171,6 +181,29 @@ class MindmapController extends Controller
             ->toArray();
 
         return view('mindmap', compact('mindmaps', 'ringkasanIds'));
+    }
+
+    public function storeComment(Request $request, $id)
+    {
+        $request->validate([
+            'komentar' => 'required|string|max:500',
+        ]);
+
+        $mindmap = Mindmap::findOrFail($id);
+
+        if ($mindmap->user !== Auth::id()) {
+            return response()->json(['error' => 'Anda tidak memiliki izin untuk mengomentari mindmap ini.'], 403);
+        }
+
+        DB::table('komentar')->insert([
+            'user' => Auth::id(),
+            'mindmaps' => $id,
+            'komentar' => $request->komentar,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Komentar berhasil ditambahkan.']);
     }
 
     public function getRingkasan($id)
@@ -192,6 +225,19 @@ class MindmapController extends Controller
                 ];
             });
 
+        $komentarLain = DB::table('komentar')
+            ->join('users', 'komentar.user', '=', 'users.id')
+            ->where('mindmaps', $id)
+            ->orderBy('komentar.created_at', 'desc')
+            ->select('users.name as user', 'komentar.komentar')
+            ->get()
+            ->map(function ($k) {
+                return [
+                    'user' => $k->user,
+                    'komentar' => $k->komentar ?? '-',
+                ];
+            });
+
         return response()->json([
             'mindmap' => [
                 'title' => $mindmap->title,
@@ -201,8 +247,10 @@ class MindmapController extends Controller
             ],
             'ringkasan_pribadi' => $ringkasanPribadi,
             'ringkasan_lain' => $ringkasans,
+            'komentar_lain' => $komentarLain ?? [],
         ]);
     }
+
     /**
      * Show the form for editing the specified resource.
      */

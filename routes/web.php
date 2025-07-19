@@ -46,4 +46,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/mindmap/{id}/ringkasan', [MindmapController::class, 'simpanRingkasan']);
 
     Route::get('/mindmap/{id}/ringkasan', [MindmapController::class, 'getRingkasan'])->name('mindmap.get-ringkasan');
+    Route::post('/mindmap/{id}/comment', [MindmapController::class, 'storeComment'])->name('mindmap.comment');
+    Route::get('/mindmap/{id}/generate-summary', [MindmapController::class, 'generateSummary'])->name('mindmap.generateSummary');
+
 });

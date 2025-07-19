@@ -1,4 +1,4 @@
-<x-mindmap.main title="Brace Mindmap" class="!p-0">
+<x-mindmap.main title="Spider Mindmap" class="!p-0">
     <div class="flex w-full h-screen relative">
 
         <div class="absolute top-2 right-2 w-48 h-48 bg-white p-2 rounded shadow-md cursor-pointer z-50"
@@ -80,21 +80,49 @@
         } = await Swal.fire({
             title: 'Tambah Node',
             html: `
-            <div class="grid gap-2">
-                <input id="node-label" class="input input-bordered w-full" placeholder="Nama Node" />
-                <select id="node-shape" class="select select-bordered">
+          <div class="space-y-4">
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold text-gray-700">Nama Node</span>
+                </label>
+                <input id="node-label" type="text" placeholder="Masukkan nama node"
+                    class="input input-bordered w-full focus:ring-2 focus:ring-primary" />
+            </div>
+
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold text-gray-700">Bentuk Node</span>
+                </label>
+                <select id="node-shape" class="select select-bordered w-full focus:ring-2 focus:ring-primary">
                     <option value="roundrectangle">Kotak Bulat</option>
                     <option value="ellipse">Elips</option>
                     <option value="rectangle">Kotak</option>
                     <option value="diamond">Berlian</option>
                 </select>
-                <div class="flex items-center gap-2">
-                    <input id="node-bg" type="color" value="#0ea5e9" class="w-10 h-10 border rounded" />
-                    <span class="text-sm">Warna Latar</span>
-                    <input id="node-color" type="color" value="#ffffff" class="w-10 h-10 border rounded ml-4" />
-                    <span class="text-sm">Warna Teks</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="label">
+                        <span class="label-text font-semibold text-gray-700">Warna Latar</span>
+                    </label>
+                    <div class="relative">
+                        <input id="node-bg" type="color" value="#0ea5e9"
+                            class="w-full h-10 border rounded cursor-pointer hover:scale-105 transition-transform" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="label">
+                        <span class="label-text font-semibold text-gray-700">Warna Teks</span>
+                    </label>
+                    <div class="relative">
+                        <input id="node-color" type="color" value="#ffffff"
+                            class="w-full h-10 border rounded cursor-pointer hover:scale-105 transition-transform" />
+                    </div>
                 </div>
             </div>
+        </div>
         `,
             focusConfirm: false,
             showCancelButton: true,
@@ -425,23 +453,49 @@
     });
 
     document.getElementById('btn-save-mindmap')?.addEventListener('click', async () => {
-        const title = await Swal.fire({
-            title: 'Judul Mindmap',
-            input: 'text',
-            inputPlaceholder: 'Masukkan judul mindmap',
+        const {
+            value: formValues,
+            isConfirmed
+        } = await Swal.fire({
+            title: 'Simpan Mindmap',
+            html: `
+           <div class="space-y-4 text-left">
+            <div>
+                <label class="block text-sm font-semibold mb-1">Judul Mindmap <span class="text-red-500">*</span></label>
+                <input id="mindmap-title" type="text" placeholder="Judul Mindmap"
+                    class="input input-bordered w-full" />
+            </div>
+            <div>
+                <label class="block text-sm font-semibold mb-1">Ringkasan Pribadi</label>
+                <textarea id="mindmap-summary" placeholder="Tulis ringkasan atau catatan pribadi di sini"
+                    class="textarea textarea-bordered w-full" rows="4"></textarea>
+            </div>
+        </div>
+        `,
+            focusConfirm: false,
             showCancelButton: true,
             confirmButtonText: 'Simpan',
-            inputValidator: (value) => {
-                if (!value) return 'Judul wajib diisi';
+            preConfirm: () => {
+                const title = document.getElementById('mindmap-title').value.trim();
+                const summary = document.getElementById('mindmap-summary').value.trim();
+
+                if (!title) {
+                    Swal.showValidationMessage('Judul wajib diisi');
+                    return;
+                }
+
+                return {
+                    title,
+                    summary
+                };
             }
         });
 
-        if (!title.isConfirmed) return;
+        if (!isConfirmed || !formValues) return;
 
         const urlParts = window.location.pathname.split('/');
-        const type = urlParts[urlParts.length - 1]; // e.g. 'spider'
+        const type = urlParts[urlParts.length - 1];
 
-        // 🔧 Generate mindmap structure
         const mindmapData = [];
 
         cy.nodes().forEach(node => {
@@ -455,7 +509,6 @@
             });
         });
 
-        // ✅ Tambahkan ini untuk membuat pngData
         const pngData = cy.png({
             scale: 2,
             full: true,
@@ -478,10 +531,11 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                 },
                 body: JSON.stringify({
-                    title: title.value,
+                    title: formValues.title,
+                    summary: formValues.summary,
                     type: type,
                     mindmap: mindmapData,
-                    image: pngData // ✅ sekarang pngData sudah tersedia
+                    image: pngData
                 })
             });
 
@@ -500,7 +554,7 @@
 
             const sidebar = document.querySelector('[x-data="mindmapSidebar"]');
             if (sidebar && sidebar.__x) {
-                sidebar.__x.$data.mindmapTitle = '🧠 ' + title.value;
+                sidebar.__x.$data.mindmapTitle = '🧠 ' + formValues.title;
             }
 
         } catch (err) {

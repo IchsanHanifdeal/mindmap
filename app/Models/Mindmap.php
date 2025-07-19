@@ -13,6 +13,7 @@ class Mindmap extends Model
         'parent_node',
         'type',
         'shareable',
+        'ringkasan_pribadi',
         'gambar_mindmap',
     ];
 
