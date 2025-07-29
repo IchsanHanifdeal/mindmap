@@ -44,7 +44,7 @@
                                     <li>
                                         <a href="{{ route('materi') }}"
                                             class="{{ request()->routeIs('materi') ? 'bg-[#f0f6ff] font-semibold' : '' }}">
-                                            <x-lucide-book-open class="w-4 h-4" /> Materi
+                                            <x-lucide-book-open class="w-4 h-4" /> Overview
                                         </a>
                                     </li>
                                     <li>
@@ -60,8 +60,8 @@
                                     </li>
                                 @else
                                     <li>
-                                        <a href="#" onclick="showLoginAlert()">
-                                            <x-lucide-book-open class="w-4 h-4" /> Materi
+                                        <a href="{{ route('materi') }}" onclick="showLoginAlert()">
+                                            <x-lucide-book-open class="w-4 h-4" /> Overview
                                         </a>
                                     </li>
                                     <li>
@@ -153,7 +153,7 @@
                             <li>
                                 <a href="{{ route('materi') }}"
                                     class="{{ request()->routeIs('materi') ? 'bg-[#f0f6ff] font-semibold rounded-md' : '' }}">
-                                    <x-lucide-book-open class="w-4 h-4" /> Materi
+                                    <x-lucide-book-open class="w-4 h-4" /> Overview
                                 </a>
                             </li>
                             <li>
@@ -165,7 +165,7 @@
                         @else
                             <li>
                                 <a href="#" onclick="showLoginAlert()"><x-lucide-book-open class="w-4 h-4" />
-                                    Materi</a>
+                                    Overview</a>
                             </li>
                             <li>
                                 <a href="#" onclick="showLoginAlert()">

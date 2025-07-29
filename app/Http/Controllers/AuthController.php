@@ -137,7 +137,7 @@ class AuthController extends Controller
             ]);
 
             if (in_array($userRole, ['admin', 'user'])) {
-                return redirect()->route('beranda')->with('toast', [
+                return redirect()->route('materi')->with('toast', [
                     'message' => 'Login berhasil!',
                     'type' => 'success'
                 ]);

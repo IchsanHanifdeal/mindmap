@@ -45,6 +45,14 @@
             <li><button data-action="zoom-out" class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
                     <x-lucide-zoom-out class="w-5 h-5 stroke-2" /> Zoom Out
                 </button></li>
+            @if (request()->is('mindmap/custom'))
+                <li>
+                    <button onclick="tampilkanReferensi()"
+                        class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">
+                        <x-lucide-eye class="w-5 h-5 stroke-2" /> Tampilkan Referensi
+                    </button>
+                </li>
+            @endif
             <li>
                 @auth
                     <button id="btn-save-mindmap" class="flex items-center px-2.5 py-2 hover:bg-[#f0f6ff] rounded">

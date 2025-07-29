@@ -1,11 +1,18 @@
 <x-mindmap.main title="Custom Step 1" class="p-0">
     <div class="flex w-full h-screen">
         <div id="jsmind_container"
-            class="relative flex-1 overflow-auto bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.1)_1px,transparent_1px)]">
+            class="relative flex-1 bg-[length:40px_40px] bg-[linear-gradient(to_right,rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.1)_1px,transparent_1px)]">
+            <div id="preview-container"
+                class="absolute top-2 right-2 w-48 h-48 bg-white p-2 rounded shadow-md cursor-pointer z-50 hidden overflow-hidden"
+                onclick="showImageModalFromPreview()">
+                <img id="preview-image" src="" alt="Gambar"
+                    class="w-full h-full object-contain transition-transform duration-200 hover:scale-105" />
+            </div>
         </div>
     </div>
 </x-mindmap.main>
 
+<script src="https://unpkg.com/cytoscape@3.28.0/dist/cytoscape.min.js"></script>
 <script>
     const cy = cytoscape({
         container: document.getElementById('jsmind_container'),
@@ -570,4 +577,67 @@
             selectedNode.style('font-size', Math.max(8, fontSize - 2) + 'px');
         }
     });
+
+    function tampilkanReferensi() {
+        const referensiImages = [{
+                name: 'Multi Flow',
+                path: '/img/multi_flow.svg'
+            },
+            {
+                name: 'Spider',
+                path: '/img/spider.png'
+            },
+            {
+                name: 'Flow',
+                path: '/img/flow.jpg'
+            },
+            {
+                name: 'Bubble',
+                path: '/img/bubble.avif'
+            },
+            {
+                name: 'Brace',
+                path: '/img/brace.svg'
+            }
+        ];
+
+        const imageOptions = referensiImages.map(img => `
+        <div onclick="setPreviewImage('${img.path}')"
+             class="border rounded p-1 hover:shadow cursor-pointer transition hover:scale-105">
+            <img src="${img.path}" alt="${img.name}" class="object-contain w-20 h-20 mx-auto" />
+            <div class="text-xs text-center mt-1">${img.name}</div>
+        </div>
+    `).join('');
+
+        Swal.fire({
+            title: 'Pilih Referensi',
+            html: `<div class="grid grid-cols-2 gap-2">${imageOptions}</div>`,
+            showConfirmButton: false,
+            width: '600px'
+        });
+    }
+
+    function setPreviewImage(path) {
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+
+        // Set src gambar preview
+        previewImage.src = path;
+
+        // Set onclick preview agar buka modal sesuai gambar
+        previewContainer.setAttribute('onclick', `showImageModal('${path}')`);
+
+        // Tampilkan div preview
+        previewContainer.classList.remove('hidden');
+
+        // Tutup SweetAlert
+        Swal.close();
+    }
+
+    function showImageModalFromPreview() {
+        const src = document.getElementById('preview-image').src;
+        if (src) {
+            showImageModal(src);
+        }
+    }
 </script>

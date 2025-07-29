@@ -109,14 +109,14 @@ EOT;
         $request->validate([
             'title' => 'required|string|max:255',
             'summary' => 'nullable|string',
-            'type' => 'required|in:brace,bubble,flow,multi,spider',
+            'type' => 'required|in:brace,bubble,flow,multi,spider,custom',
             'mindmap' => 'required|array|min:1',
             'mindmap.*.node' => 'required|string',
             'mindmap.*.parent_node' => 'nullable|string',
             'image' => 'nullable|string' // base64 image
         ]);
 
-        $userId = Auth::id();
+        $userId = Auth::user()->id;
         $imagePath = null;
 
         if ($request->has('image')) {
@@ -164,7 +164,7 @@ EOT;
 
         if (Auth::user()->role !== 'admin') {
             $query->where(function ($q) {
-                $q->where('user', Auth::id())
+                $q->where('user', Auth::user()->id)
                     ->orWhere('shareable', 'yes');
             });
         }
@@ -176,7 +176,7 @@ EOT;
             ->values(); // reset key
 
         $ringkasanIds = DB::table('ringkasans')
-            ->where('user', Auth::id())
+            ->where('user', Auth::user()->id)
             ->pluck('mindmaps')
             ->toArray();
 
@@ -191,12 +191,12 @@ EOT;
 
         $mindmap = Mindmap::findOrFail($id);
 
-        if ($mindmap->user !== Auth::id()) {
+        if ($mindmap->user !== Auth::user()->id) {
             return response()->json(['error' => 'Anda tidak memiliki izin untuk mengomentari mindmap ini.'], 403);
         }
 
         DB::table('komentar')->insert([
-            'user' => Auth::id(),
+            'user' => Auth::user()->id,
             'mindmaps' => $id,
             'komentar' => $request->komentar,
             'created_at' => now(),
@@ -211,9 +211,7 @@ EOT;
         $mindmap = Mindmap::with('userRelation')->findOrFail($id);
 
         $ringkasanPribadi = null;
-        if ($mindmap->user === Auth::id()) {
-            $ringkasanPribadi = $mindmap->ringkasan_pribadi;
-        }
+        $ringkasanPribadi = $mindmap->user === Auth::user()->id ? $mindmap->ringkasan_pribadi : null;
 
         $ringkasans = Ringkasan::where('mindmaps', $id)
             ->with('userRelation')
@@ -258,7 +256,7 @@ EOT;
     {
         $mindmap = Mindmap::findOrFail($id);
 
-        if ($mindmap->user !== Auth::id()) {
+        if ($mindmap->user !== Auth::user()->id) {
             return response()->json(['error' => 'Anda tidak diizinkan mengubah status bagikan.'], 403);
         }
 
@@ -283,7 +281,7 @@ EOT;
         $mindmap = Mindmap::findOrFail($id);
 
         // Pastikan pengguna hanya bisa menyimpan ringkasan untuk mindmap mereka sendiri
-        if ($mindmap->user !== Auth::id()) {
+        if ($mindmap->user !== Auth::user()->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki izin untuk menyimpan ringkasan ini.'
@@ -294,7 +292,7 @@ EOT;
             // Simpan ringkasan (update jika sudah ada, atau buat baru)
             Ringkasan::updateOrCreate(
                 [
-                    'user' => Auth::id(),
+                    'user' => Auth::user()->id,
                     'mindmaps' => $mindmap->id
                 ],
                 [
@@ -322,7 +320,7 @@ EOT;
     {
         $mindmap = Mindmap::findOrFail($id);
 
-        if ($mindmap->user !== Auth::id()) {
+        if ($mindmap->user !== Auth::user()->id) {
             return redirect()->back()->with('toast', [
                 'message' => 'Anda tidak memiliki akses untuk menghapus mindmap ini.',
                 'type' => 'error'

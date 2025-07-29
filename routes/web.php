@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MateriController;
 use App\Http\Controllers\MindmapController;
+use App\Http\Controllers\KataKunciController;
 use App\Http\Controllers\RingkasanController;
 
 Route::get('/', function () {
@@ -49,4 +50,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/mindmap/{id}/comment', [MindmapController::class, 'storeComment'])->name('mindmap.comment');
     Route::get('/mindmap/{id}/generate-summary', [MindmapController::class, 'generateSummary'])->name('mindmap.generateSummary');
 
-});
+    Route::get('/api/kata-kunci', [KataKunciController::class, 'index']);
+    Route::post('/api/kata-kunci', [KataKunciController::class, 'store']);
+    Route::put('/api/kata-kunci/{id}', [KataKunciController::class, 'update']);
+    Route::delete('/api/kata-kunci/{id}', [KataKunciController::class, 'destroy']);});

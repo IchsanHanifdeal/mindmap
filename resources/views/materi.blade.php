@@ -1,10 +1,15 @@
 <x-main title="Materi" class="p-0 min-h-screen flex flex-col">
+    <style>
+        .swal2-container.swal2-top-end {
+            z-index: 9999 !important;
+        }
+    </style>
     <x-home.navbar />
 
     <section class="flex-grow bg-gradient-to-br from-[#f0f6ff] to-[#e0ebff] px-6 py-12">
         <div class="max-w-7xl mx-auto">
             <div class="flex items-center justify-between mb-10">
-                <h1 class="text-4xl font-extrabold tracking-tight text-[#123f77]">Perpustakaan Materi</h1>
+                <h1 class="text-4xl font-extrabold tracking-tight text-[#123f77]">Overview</h1>
 
                 @if (Auth::user()->role === 'admin')
                     <button onclick="tambah_materi_modal.showModal()" class="btn btn-primary rounded-xl shadow-md gap-2">
@@ -56,6 +61,18 @@
                                             </button>
                                         </div>
                                     @endif
+                                    <div class="tooltip" data-tip="Catat Highlight">
+                                        <button type="button" onclick="showKataKunciModal({{ $item->id }})"
+                                            class="btn btn-sm btn-primary flex items-center gap-1">
+                                            <x-lucide-book-key class="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <div class="tooltip" data-tip="Buat Mindmap dari Materi">
+                                        <button type="button" onclick="makeMindmap({{ $item->id }})"
+                                            class="btn btn-sm bg-blue-500 flex items-center gap-1 hover:bg-blue-700">
+                                            <x-lucide-pencil-ruler class="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             @elseif (Auth::user()->role === 'admin')
                                 <div class="flex flex-wrap justify-end gap-2 pt-4 border-t">
@@ -109,7 +126,7 @@
         </div>
     </dialog>
 
-    <dialog id="pdf_viewer_modal" class="modal">
+    <dialog id="pdf_viewer_modal" class="modal hidden">
         <div class="modal-box w-full max-w-6xl h-[90vh] p-0 overflow-hidden bg-base-100 rounded-xl">
             <div class="flex justify-between items-center px-4 py-3 bg-[#123f77] text-white border-b">
                 <h3 class="font-bold text-lg">Pratinjau Dokumen</h3>
@@ -198,6 +215,7 @@
         }
 
         function openPdfModal(url) {
+            document.getElementById('pdf_viewer_modal').classList.remove('hidden');
             const modal = document.getElementById('pdf_viewer_modal');
             const iframe = document.getElementById('pdf_viewer_iframe');
             iframe.style.opacity = 0;
@@ -206,11 +224,37 @@
             iframe.onload = () => iframe.style.opacity = 1;
         }
 
+        window.addEventListener('message', async (event) => {
+            if (event.data.action === 'add_kata_kunci') {
+                await addKataKunciFromHighlight(event.data.text);
+            }
+        });
+
         function closePdfModal() {
+            document.getElementById('pdf_viewer_modal').classList.add('hidden');
             const modal = document.getElementById('pdf_viewer_modal');
-            const iframe = document.getElementById('pdf_viewer_iframe');
-            iframe.src = '';
+            document.getElementById('pdf_viewer_iframe').src = '';
             modal.close();
+        }
+
+        async function addKataKunciFromHighlight(text) {
+            if (!text || !currentMateriId) return;
+
+            await fetch('/api/kata-kunci', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    materi: currentMateriId,
+                    user: userId,
+                    kata_kunci: text
+                })
+            });
+
+            await refreshTable();
+            showToastSuccess(`"${text}" berhasil ditambahkan sebagai Highlight`);
         }
 
         function confirmDelete(id) {
@@ -289,5 +333,232 @@
             }
             toggleUpload();
         });
+
+        // Highlight Modal
+        const userId = {{ Auth::user()->id }};
+        let currentMateriId = null;
+        let kataKunciList = [];
+
+        async function loadKataKunci() {
+            const res = await fetch(`/api/kata-kunci?materi=${currentMateriId}&user=${userId}`);
+            kataKunciList = await res.json();
+        }
+
+        function renderTableRows() {
+            if (kataKunciList.length === 0) {
+                return `
+            <tr>
+                <td colspan="3" class="text-center text-gray-500 italic">Belum ada Highlight tercatat</td>
+            </tr>
+        `;
+            }
+
+            return kataKunciList.map((kk, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td class="capitalize">${kk.kata_kunci}</td>
+            <td class="flex gap-1">
+                <button class="btn btn-xs btn-warning" onclick="editKataKunci(${kk.id})">
+                    <x-lucide-pencil class="w-4 h-4" />
+                </button>
+                <button class="btn btn-xs btn-error" onclick="deleteKataKunci(${kk.id})">
+                    <x-lucide-trash-2 class="w-4 h-4" />
+                </button>
+            </td>
+        </tr>
+    `).join('');
+        }
+
+        async function refreshTable() {
+            try {
+                await loadKataKunci();
+
+                const tbody = Swal.getPopup()?.querySelector('#kataKunciTableBody');
+                if (!tbody) return;
+
+                tbody.innerHTML = renderTableRows();
+            } catch (error) {
+                console.error('Gagal memuat Highlight:', error);
+                showToastError('Gagal memuat daftar Highlight');
+            }
+        }
+
+        async function showKataKunciModal(materiId) {
+            currentMateriId = materiId;
+            await loadKataKunci();
+
+            Swal.fire({
+                title: '<b>Catat Highlight</b>',
+                html: `
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body p-2">
+                        <div class="flex gap-2">
+                            <input id="newKataKunci" type="text" placeholder="Masukkan Highlight"
+                                class="input input-bordered flex-1" />
+                            <button id="addKataKunciBtn" class="btn btn-success">
+                                <i class="lucide lucide-plus"></i> Tambah
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto mt-3 max-h-52 overflow-y-auto">
+                            <table class="table table-zebra">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Highlight</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kataKunciTableBody">
+                                    ${renderTableRows()}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `,
+                showConfirmButton: false,
+                width: '500px',
+                didOpen: () => {
+                    const addBtn = Swal.getPopup().querySelector('#addKataKunciBtn');
+                    addBtn.addEventListener('click', async () => {
+                        const input = Swal.getPopup().querySelector('#newKataKunci');
+                        const value = input.value.trim();
+                        if (!value) return;
+
+                        await fetch('/api/kata-kunci', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify({
+                                materi: currentMateriId,
+                                user: userId,
+                                kata_kunci: value
+                            })
+                        });
+
+                        input.value = '';
+                        await refreshTable();
+                        showToastSuccess('Highlight berhasil ditambahkan');
+                    });
+
+                }
+            });
+        }
+
+        async function editKataKunci(id) {
+            const kk = kataKunciList.find(k => k.id === id);
+            if (!kk) return;
+
+            await Swal.fire({
+                title: '<b>Edit Highlight</b>',
+                html: `
+            <div class="flex flex-col gap-2">
+                <input id="editKataKunciInput" type="text" value="${kk.kata_kunci}"
+                    class="input input-bordered w-full" />
+                <button id="saveEditBtn" class="btn btn-primary w-full">
+                    <i class="lucide lucide-save mr-1"></i> Simpan
+                </button>
+            </div>
+        `,
+                showConfirmButton: false,
+                width: '400px',
+                didOpen: () => {
+                    const saveBtn = Swal.getPopup().querySelector('#saveEditBtn');
+                    saveBtn.addEventListener('click', async () => {
+                        const input = Swal.getPopup().querySelector('#editKataKunciInput');
+                        const newVal = input.value.trim();
+                        if (!newVal) {
+                            Swal.showValidationMessage('Highlight tidak boleh kosong');
+                            return;
+                        }
+
+                        await fetch(`/api/kata-kunci/${id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify({
+                                kata_kunci: newVal
+                            })
+                        });
+
+                        Swal.close();
+                        await refreshTable();
+                        showToastSuccess('Highlight berhasil diubah');
+                    });
+
+                }
+            });
+        }
+
+
+        async function deleteKataKunci(id) {
+            const {
+                isConfirmed
+            } = await Swal.fire({
+                title: 'Hapus Highlight?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus'
+            });
+
+            if (isConfirmed) {
+                await fetch(`/api/kata-kunci/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    }
+                });
+
+                await refreshTable();
+                showToastSuccess('Highlight berhasil dihapus');
+            }
+
+        }
+
+        function showToastSuccess(message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: message,
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+        }
+
+        function makeMindmap() {
+            Swal.fire({
+                title: 'Pilih Jenis Mindmap',
+                input: 'select',
+                inputOptions: {
+                    spider: 'Spider Map',
+                    flow: 'Flow Map',
+                    multi: 'Multi-flow Map',
+                    bubble: 'Bubble Map',
+                    brace: 'Brace Map',
+                    custom: 'Custom Map'
+                },
+                inputPlaceholder: 'Pilih satu jenis',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    const selectedType = result.value;
+                    window.location.href = `/mindmap/${selectedType}`;
+                }
+            });
+        }
     </script>
 </x-main>

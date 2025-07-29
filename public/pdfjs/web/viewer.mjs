@@ -438,6 +438,12 @@ const animationStarted = new Promise(function (resolve) {
   window.requestAnimationFrame(resolve);
 });
 const docStyle = document.documentElement.style;
+document.addEventListener('mouseup', function() {
+    const selectedText = window.getSelection().toString().trim();
+    if (selectedText) {
+        window.parent.postMessage({ action: 'add_kata_kunci', text: selectedText }, '*');
+    }
+});
 class ProgressBar {
   #classList = null;
   #disableAutoFetchTimeout = null;

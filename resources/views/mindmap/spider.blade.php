@@ -552,11 +552,6 @@
                 showConfirmButton: false
             });
 
-            const sidebar = document.querySelector('[x-data="mindmapSidebar"]');
-            if (sidebar && sidebar.__x) {
-                sidebar.__x.$data.mindmapTitle = '🧠 ' + formValues.title;
-            }
-
         } catch (err) {
             console.error(err);
             Swal.fire('Gagal', 'Terjadi kesalahan saat menyimpan mindmap.', 'error');

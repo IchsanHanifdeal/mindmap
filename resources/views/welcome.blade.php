@@ -12,12 +12,18 @@
                 interaktif.
             </p>
             <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-                <button id="startMindmapBtn"
-                    class="btn bg-[#123f77] hover:bg-[#0f86b6] text-white font-semibold px-6 py-3 rounded-xl">
-                    Mulai Inview
-                </button>
+                @auth
+                    <a href="{{ route('materi') }}"
+                        class="btn bg-[#123f77] hover:bg-[#0f86b6] text-white font-semibold px-6 py-3 rounded-xl">
+                        Overview
+                    </a>
+                @else
+                    <button onclick="showLoginAlert()"
+                        class="btn bg-[#123f77] hover:bg-[#0f86b6] text-white font-semibold px-6 py-3 rounded-xl">
+                        Overview
+                    </button>
+                @endauth
             </div>
-
         </div>
     </section>
 </x-main>

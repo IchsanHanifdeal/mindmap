@@ -39,7 +39,7 @@
                                 @if (Auth::user()->role === 'admin')
                                     <div class="flex flex-wrap justify-end gap-2 border-t pt-4">
                                         <!-- Tombol Ringkasan -->
-                                        <div class="tooltip" data-tip="Lihat Ringkasan">
+                                        <div class="tooltip" data-tip="Reflecting">
                                             <button type="button" onclick="showRingkasan({{ $map->id }})"
                                                 class="btn btn-sm btn-primary flex items-center gap-1">
                                                 <x-lucide-list class="w-4 h-4" />
@@ -88,6 +88,13 @@
                                                 <x-lucide-bot class="w-4 h-4" />
                                             </button>
                                         </div>
+                                        <div class="tooltip" data-tip="Download Mindmap">
+                                            <a href="{{ asset('storage/' . $map->gambar_mindmap) }}" download
+                                                class="btn btn-sm btn-success flex items-center gap-1">
+                                                <x-lucide-download class="w-4 h-4" />
+                                            </a>
+                                        </div>
+
                                     </div>
                                 @else
                                     <div class="flex flex-wrap justify-end gap-2 border-t pt-4">
@@ -101,7 +108,7 @@
                                             </div>
                                         @endif
                                         @if (!in_array($map->id, $ringkasanIds ?? []))
-                                            <div class="tooltip" data-tip="Buat Ringkasan">
+                                            <div class="tooltip" data-tip="Summarizing">
                                                 <button type="button"
                                                     onclick="buatRingkasan({{ $map->id }}, @js($map->ringkasan_pribadi ?? '') )"
                                                     class="btn btn-sm btn-secondary flex items-center gap-1">
@@ -109,12 +116,19 @@
                                                 </button>
                                             </div>
                                         @endif
-                                        <div class="tooltip" data-tip="Lihat Ringkasan">
+                                        <div class="tooltip" data-tip="Reflecting">
                                             <button type="button" onclick="showRingkasan({{ $map->id }})"
                                                 class="btn btn-sm btn-primary flex items-center gap-1">
                                                 <x-lucide-list class="w-4 h-4" />
                                             </button>
                                         </div>
+                                        <div class="tooltip" data-tip="Download Mindmap">
+                                            <a href="{{ asset('storage/' . $map->gambar_mindmap) }}" download
+                                                class="btn btn-sm btn-success flex items-center gap-1">
+                                                <x-lucide-download class="w-4 h-4" />
+                                            </a>
+                                        </div>
+
                                     </div>
                                 @endif
                             </div>
