@@ -39,17 +39,14 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
+            'account_type' => 'required|in:mahasiswa,dosen,tutor,personal',
         ], [
             'name.required' => 'Nama harus diisi.',
-            'name.string' => 'Nama harus berupa teks.',
-            'name.max' => 'Nama maksimal 255 karakter.',
             'email.required' => 'Email harus diisi.',
-            'email.email' => 'Email harus berupa alamat email yang valid.',
             'email.unique' => 'Email sudah digunakan, silakan gunakan email lain.',
             'password.required' => 'Password harus diisi.',
-            'password.string' => 'Password harus berupa teks.',
-            'password.min' => 'Password minimal 6 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'account_type.required' => 'Jenis akun harus dipilih.',
         ]);
 
         if ($validator->fails()) {
@@ -62,13 +59,15 @@ class AuthController extends Controller
         }
 
         try {
+            $role = in_array($request->account_type, ['dosen', 'tutor']) ? 'admin' : 'user';
+
             $user = new User();
             $user->name = $request->name;
             $user->email = $request->email;
             $user->password = Hash::make($request->password);
-            $user->role = 'user';
-
+            $user->role = $role;
             $user->save();
+
             return redirect()->route('login')->with('toast', [
                 'message' => 'Pendaftaran berhasil. Silakan login.',
                 'type' => 'success'
@@ -84,6 +83,7 @@ class AuthController extends Controller
             ]);
         }
     }
+
 
     public function logout(Request $request)
     {

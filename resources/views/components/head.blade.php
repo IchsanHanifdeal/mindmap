@@ -5,29 +5,29 @@
 
     <!-- SEO Meta -->
     <meta name="description"
-        content="MindMapku adalah aplikasi digital pembuat peta pikiran yang mendorong kemampuan berpikir kritis melalui proses merangkum dan merefleksi bacaan secara interaktif.">
+        content="Digital Mind Mapping OPIRSURE adalah aplikasi digital pembuat peta pikiran yang mendorong kemampuan berpikir kritis melalui proses merangkum dan merefleksi bacaan secara interaktif.">
     <meta name="keywords"
         content="MindMap, Peta Pikiran, Pendidikan, E-Learning, Critical Reading, Ringkasan Teks, Refleksi, Spider Map, Flow Map, Brace Map, Bubble Map">
-    <meta name="author" content="MindMapku Team">
+    <meta name="author" content="Digital Mind Mapping OPIRSURE Team">
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:url" content="https://mindmapku.com">
+    <meta property="og:url" content="https://Digital Mind Mapping OPIRSURE.com">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="MindMapku - Digital Mind Mapping untuk Membaca Kritis">
+    <meta property="og:title" content="Digital Mind Mapping OPIRSURE - Digital Mind Mapping untuk Membaca Kritis">
     <meta property="og:description"
         content="Visualisasikan, ringkas, dan refleksikan bacaan secara kreatif dengan berbagai jenis peta pikiran seperti Spider Map, Flow Map, dan lainnya.">
-    <meta property="og:image" content="https://mindmapku.com/og-preview.jpg">
+    <meta property="og:image" content="https://Digital Mind Mapping OPIRSURE.com/og-preview.jpg">
     <meta property="og:image:width" content="600">
     <meta property="og:image:height" content="400">
 
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="MindMapku - Peta Pikiran Interaktif untuk Membaca Kritis">
+    <meta name="twitter:title" content="Digital Mind Mapping OPIRSURE - Peta Pikiran Interaktif untuk Membaca Kritis">
     <meta name="twitter:description"
-        content="MindMapku mempermudah siswa memahami bacaan dengan membuat ringkasan dan refleksi secara visual dalam bentuk peta pikiran.">
-    <meta name="twitter:image" content="https://mindmapku.com/og-preview.jpg">
-    <meta property="twitter:domain" content="mindmapku.com">
-    <meta property="twitter:url" content="https://mindmapku.com">
+        content="Digital Mind Mapping OPIRSURE mempermudah siswa memahami bacaan dengan membuat ringkasan dan refleksi secara visual dalam bentuk peta pikiran.">
+    <meta name="twitter:image" content="https://Digital Mind Mapping OPIRSURE.com/og-preview.jpg">
+    <meta property="twitter:domain" content="Digital Mind Mapping OPIRSURE.com">
+    <meta property="twitter:url" content="https://Digital Mind Mapping OPIRSURE.com">
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
@@ -95,7 +95,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <!-- Title -->
-    <title>MindMapku | {{ $title ?? 'Peta Pikiran Digital yang Interaktif' }}</title>
+    <title>Digital Mind Mapping OPIRSURE | {{ $title ?? 'Peta Pikiran Digital yang Interaktif' }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         .export-safe,

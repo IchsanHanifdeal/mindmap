@@ -48,6 +48,7 @@
     <main class="{{ $class ?? 'p-4' }}" role="main">
         <div id="splash-screen"
             class="fixed inset-0 flex items-center justify-center min-h-screen z-[9999] transition-opacity duration-500 ease-in-out opacity-100 bg-[#c8d69b]">
+
             <div
                 class="relative flex flex-col items-center justify-center p-8 rounded-3xl shadow-lg bg-white bg-opacity-90 backdrop-blur-lg border border-gray-200 transition-transform duration-1000 ease-in-out animate-pulse scale-100 hover:scale-105">
 
@@ -62,10 +63,21 @@
                 </div>
 
                 <!-- Branding -->
-                <h1 class="text-4xl font-bold text-[#123f77] tracking-wide">Mindmapku</h1>
-                <p class="text-sm mt-2 italic text-gray-600">Tunggu sebentar, sedang memuat...</p>
+                <div class="flex flex-col text-center leading-tight">
+                    <span class="text-[#0d3970] font-extrabold text-3xl tracking-wide drop-shadow-sm">
+                        Digital Mind Mapping
+                    </span>
+                    <span class="text-[#e8891a] font-bold text-lg tracking-wider uppercase">
+                        Opirsure
+                    </span>
+                </div>
+
+                <p class="text-sm mt-3 italic text-gray-600">
+                    Tunggu sebentar, sedang memuat...
+                </p>
             </div>
         </div>
+
 
         {{ $slot }}
 

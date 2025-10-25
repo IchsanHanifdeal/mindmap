@@ -548,8 +548,10 @@
                 icon: 'success',
                 title: 'Berhasil',
                 text: 'Mindmap berhasil disimpan!',
-                timer: 2000,
+                timer: 1500,
                 showConfirmButton: false
+            }).then(() => {
+                window.location.href = "{{ route('mindmap.saved') }}";
             });
 
             const sidebar = document.querySelector('[x-data="mindmapSidebar"]');

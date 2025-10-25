@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('parent_node')->nullable();
             $table->string('gambar_mindmap')->nullable();
             $table->string('ringkasan_pribadi')->nullable();
-            $table->enum('type', ['brace', 'bubble', 'flow', 'multi', 'spider'])->nullable();
+            $table->enum('type', ['brace', 'bubble', 'flow', 'multi', 'spider', 'custom'])->nullable();
             $table->enum('shareable', ['yes', 'no'])->default('no');
             $table->timestamps();
         });

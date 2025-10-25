@@ -294,7 +294,7 @@
         });
     }
 
-    function showRingkasan(mindmapId) {
+    async function showRingkasan(mindmapId) {
         Swal.fire({
             title: 'Mengambil ringkasan...',
             text: 'Harap tunggu sebentar.',
@@ -315,60 +315,65 @@
                 } = data;
 
                 let html = `
-    <div class="text-left space-y-4">
-        <div>
-            <h2 class="text-xl font-bold text-[#123f77]">${mindmap.title}</h2>
-            <p class="text-sm text-gray-500">
-                <span class="badge badge-outline mr-2">${mindmap.type}</span>
-                oleh <span class="font-semibold">${mindmap.creator}</span>
-                pada <span class="italic">${mindmap.created_at}</span>
-            </p>
-        </div>
-    `;
+                <div class="text-left space-y-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-[#123f77]">${mindmap.title}</h2>
+                        <p class="text-sm text-gray-500">
+                            <span class="badge badge-outline mr-2">${mindmap.type}</span>
+                            oleh <span class="font-semibold">${mindmap.creator}</span>
+                            pada <span class="italic">${mindmap.created_at}</span>
+                        </p>
+                    </div>
+                `;
 
                 if (ringkasan_pribadi) {
                     html += `
-        <div class="border rounded-lg p-4 bg-blue-50">
-            <p class="font-semibold mb-2 text-[#123f77]">Ringkasan Pribadi Anda</p>
-            <div class="prose text-gray-700">${ringkasan_pribadi}</div>
-        </div>
-    `;
+                    <div class="border rounded-lg p-4 bg-blue-50">
+                        <p class="font-semibold mb-2 text-[#123f77]">Ringkasan Pribadi Anda</p>
+                        <div class="prose text-gray-700">${ringkasan_pribadi}</div>
+                    </div>
+                `;
                 }
 
                 if (ringkasan_lain.length > 0) {
                     html += `
-        <div class="border rounded-lg p-4 bg-gray-50">
-            <p class="font-semibold mb-2 text-[#123f77]">Ringkasan dari Pengguna Lain</p>
-            <div class="space-y-2">
-    `;
+                    <div class="border rounded-lg p-4 bg-gray-50">
+                        <p class="font-semibold mb-2 text-[#123f77]">Ringkasan dari Pengguna Lain</p>
+                        <div class="space-y-2">
+                `;
 
                     ringkasan_lain.forEach(item => {
                         html += `
-            <div class="flex items-start gap-2">
-                <span class="badge badge-primary">${item.user}</span>
-                <div class="bg-white border rounded-md p-2 flex-1 text-gray-700">
-                    ${item.ringkasan}
-                </div>
-            </div>
-        `;
+                        <div class="flex items-start gap-2">
+                            <span class="badge badge-primary">${item.user}</span>
+                            <div class="bg-white border rounded-md p-2 flex-1 text-gray-700">
+                                ${item.ringkasan}
+                            </div>
+                        </div>
+                    `;
                     });
 
                     html += `</div></div>`;
                 }
 
                 html += `
-        <div class="border rounded-lg p-4 bg-gray-50">
-            <p class="font-semibold mb-2 text-[#123f77]">💬 Komentar dari Pengguna Lain</p>
-            <div class="space-y-2 max-h-40 overflow-y-auto">
-    `;
+                    <div class="border rounded-lg p-4 bg-gray-50">
+                        <p class="font-semibold mb-2 text-[#123f77]">💬 Komentar dari Pengguna Lain</p>
+                        <div class="space-y-2 max-h-40 overflow-y-auto">
+                `;
 
                 if (komentar_lain.length > 0) {
                     komentar_lain.forEach(item => {
+                        let posisiChat = item.user == data.current_user_id ? 'chat-end' :
+                            'chat-start';
+                        let bubbleColor = item.user == data.current_user_id ? 'bg-green-100' :
+                            'bg-blue-100';
+
                         html += `
-            <div class="chat chat-start">
-                <div class="chat-header font-semibold">${item.user}</div>
-                <div class="chat-bubble bg-blue-100 text-gray-800">${item.komentar}</div>
-            </div>
+        <div class="chat ${posisiChat}">
+            <div class="chat-header font-semibold">${item.user}</div>
+            <div class="chat-bubble ${bubbleColor} text-gray-800">${item.komentar}</div>
+        </div>
         `;
                     });
                 } else {
@@ -376,17 +381,17 @@
                 }
 
                 html += `
-            </div>
-        </div>
+                        </div>
+                    </div>
 
-        <div class="border rounded-lg p-4 bg-white">
-            <p class="font-semibold mb-2 text-[#123f77]">✏️ Berikan Komentar Anda</p>
-            <textarea id="user-comment" class="textarea textarea-bordered w-full" rows="3" placeholder="Tulis komentar..."></textarea>
-            <button id="submit-comment" class="btn btn-primary mt-2 w-full">Kirim Komentar</button>
-        </div>
+                    <div class="border rounded-lg p-4 bg-white">
+                        <p class="font-semibold mb-2 text-[#123f77]">✏️ Berikan Komentar Anda</p>
+                        <textarea id="user-comment" class="textarea textarea-bordered w-full" rows="3" placeholder="Tulis komentar..."></textarea>
+                        <button id="submit-comment" class="btn btn-primary mt-2 w-full">Kirim Komentar</button>
+                    </div>
 
-    </div>
-    `;
+                </div>
+                `;
 
                 Swal.fire({
                     title: 'Ringkasan & Komentar',
@@ -396,7 +401,8 @@
                     didOpen: () => {
                         document.getElementById('submit-comment').addEventListener('click',
                             async () => {
-                                const comment = document.getElementById('user-comment').value
+                                const comment = document.getElementById('user-comment')
+                                    .value
                                     .trim();
                                 if (!comment) {
                                     return Swal.fire('Oops', 'Komentar tidak boleh kosong.',
@@ -404,7 +410,8 @@
                                 }
 
                                 try {
-                                    const res = await fetch(`/mindmap/${mindmapId}/comment`, {
+                                    const res = await fetch(
+                                    `/mindmap/${mindmapId}/comment`, {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
@@ -427,7 +434,8 @@
                                 } catch (err) {
                                     console.error(err);
                                     Swal.fire('Gagal',
-                                        'Terjadi kesalahan saat mengirim komentar.', 'error'
+                                        'Terjadi kesalahan saat mengirim komentar.',
+                                        'error'
                                     );
                                 }
                             });

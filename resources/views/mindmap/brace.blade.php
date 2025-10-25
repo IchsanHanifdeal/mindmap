@@ -76,7 +76,7 @@
         const mind = {
             meta: {
                 name: "demo",
-                author: "Mindmapku",
+                author: "Digital Mind Mapping OPIRSURE",
                 version: "1.0"
             },
             format: "node_array",
@@ -220,7 +220,7 @@
     const defaultMind = {
         meta: {
             name: "demo",
-            author: "Mindmapku",
+            author: "Digital Mind Mapping OPIRSURE",
             version: "1.0"
         },
         format: "node_array",

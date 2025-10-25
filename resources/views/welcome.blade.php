@@ -2,25 +2,37 @@
     <x-home.navbar />
 
     <section
-        class="flex-grow flex items-center justify-center bg-gradient-to-br from-[#f0f6ff] to-[#e0ebff] px-6 text-center">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-[#123f77] leading-tight">
-                Digital Mind Mapping untuk Pembaca Kritis
-            </h1>
-            <p class="mt-5 text-lg md:text-xl text-gray-700">
-                Visualisasikan ide, rangkum bacaan, dan refleksikan pemahamanmu dalam satu platform edukatif yang
-                interaktif.
+        class="relative flex-grow flex items-center justify-center bg-gradient-to-br from-[#f4f8ff] via-[#e8f0ff] to-[#d7e6ff] px-6 overflow-hidden">
+
+        <!-- Decorative Background Shapes -->
+        <div class="absolute top-0 right-0 w-40 h-40 bg-[#0f86b6]/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-52 h-52 bg-[#123f77]/20 rounded-full blur-3xl"></div>
+
+        <div class="relative max-w-4xl mx-auto text-center">
+            <!-- Branding -->
+            <div class="flex flex-col mb-6 leading-tight">
+                <span class="text-[#0d3970] font-extrabold text-4xl md:text-5xl drop-shadow-sm">
+                    Digital Mind Mapping
+                </span>
+                <span class="text-[#e8891a] font-bold tracking-[0.15em] text-lg md:text-xl uppercase">
+                    Opirsure
+                </span>
+            </div>
+
+            <p class="mt-2 text-lg md:text-xl text-gray-700 max-w-2xl mx-auto">
+                Visualisasikan ide, rangkum bacaan, dan refleksikan pemahamanmu dalam satu platform edukatif yang interaktif.
             </p>
-            <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+
+            <div class="mt-10 flex flex-wrap justify-center gap-4">
                 @auth
                     <a href="{{ route('materi') }}"
-                        class="btn bg-[#123f77] hover:bg-[#0f86b6] text-white font-semibold px-6 py-3 rounded-xl">
-                        Overview
+                        class="px-8 py-3 rounded-xl bg-[#123f77] text-white hover:bg-[#0f86b6] font-semibold shadow-lg transition-transform hover:scale-105">
+                        Mulai Jelajah
                     </a>
                 @else
                     <button onclick="showLoginAlert()"
-                        class="btn bg-[#123f77] hover:bg-[#0f86b6] text-white font-semibold px-6 py-3 rounded-xl">
-                        Overview
+                        class="px-8 py-3 rounded-xl bg-[#123f77] text-white hover:bg-[#0f86b6] font-semibold shadow-lg transition-transform hover:scale-105">
+                        Mulai Jelajah
                     </button>
                 @endauth
             </div>

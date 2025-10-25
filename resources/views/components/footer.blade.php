@@ -4,7 +4,7 @@
 
 <footer class="p-5 border-t border-gray-200 bg-white text-center">
     <div class="container mx-auto flex justify-between items-center text-sm text-[#123f77]">
-        <span>&copy; {{ date('Y') }} Mindmapku™. All Rights Reserved.</span>
+        <span>&copy; {{ date('Y') }} Digital Mind Mapping OPIRSURE™. All Rights Reserved.</span>
     </div>
 </footer>
 

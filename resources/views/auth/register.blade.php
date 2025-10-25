@@ -5,6 +5,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -46,7 +47,7 @@
             <div class="absolute inset-0 bg-black/60 z-0"></div>
             <div class="z-10 px-16 text-center animate-fade-in text-white">
                 <h2 class="text-4xl font-extrabold leading-relaxed">
-                    Gabung dengan <span class="gradient-text">Mindmapku</span>
+                    Gabung dengan <span class="gradient-text">Digital Mind Mapping OPIRSURE</span>
                 </h2>
                 <p class="mt-4 text-lg text-white/90 max-w-lg mx-auto">
                     Ciptakan peta pikiranmu dan kembangkan pemahaman kritis secara visual.
@@ -57,12 +58,14 @@
         <!-- Form Section -->
         <div class="lg:w-1/2 w-full flex items-center justify-center relative px-6 lg:px-16 py-12 bg-base-100">
             <div class="w-full max-w-md bg-white shadow-lg rounded-xl p-8 z-10 animate-fade-in">
-                <h1 class="text-3xl font-bold text-primary text-center mb-2">
-                    Daftar ke <span class="text-[#0f86b6]">Mindmapku</span>
+                <h1 class="text-center mb-3 leading-tight">
+                    <span class="block text-3xl md:text-4xl font-extrabold text-[#0d3970] drop-shadow-sm">
+                        Daftar ke Platform
+                    </span>
+                    <span class="block text-xl md:text-2xl font-bold tracking-wide text-[#e8891a] uppercase">
+                        Digital Mind Mapping OPIRSURE
+                    </span>
                 </h1>
-                <p class="text-center text-gray-500 text-sm mb-6">
-                    Mulai perjalanan belajar kritismu sekarang.
-                </p>
 
                 <form method="POST" action="{{ route('register.store') }}" class="space-y-4">
                     @csrf
@@ -83,6 +86,29 @@
                             class="input input-bordered w-full {{ $errors->has('email') ? 'input-error' : '' }}"
                             value="{{ old('email') }}">
                         @error('email')
+                            <small class="text-error">{{ $message }}</small>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="label text-sm text-primary">Jenis Akun</label>
+                        <select name="account_type" required
+                            class="select select-bordered w-full {{ $errors->has('account_type') ? 'select-error' : '' }}">
+                            <option value="" disabled selected>Pilih jenis akun</option>
+                            <option value="mahasiswa" {{ old('account_type') == 'mahasiswa' ? 'selected' : '' }}>
+                                Mahasiswa
+                            </option>
+                            <option value="dosen" {{ old('account_type') == 'dosen' ? 'selected' : '' }}>
+                                Dosen
+                            </option>
+                            <option value="tutor" {{ old('account_type') == 'tutor' ? 'selected' : '' }}>
+                                Tutor
+                            </option>
+                            <option value="personal" {{ old('account_type') == 'personal' ? 'selected' : '' }}>
+                                Personal
+                            </option>
+                        </select>
+                        @error('account_type')
                             <small class="text-error">{{ $message }}</small>
                         @enderror
                     </div>

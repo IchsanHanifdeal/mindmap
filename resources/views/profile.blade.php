@@ -4,26 +4,25 @@
     <div class="flex-1 p-6 bg-base-200">
         <div class="max-w-7xl mx-auto flex flex-col gap-6">
             {{-- Ringkasan --}}
-            <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid sm:grid-cols-2 md:grid-cols-5 gap-4">
                 @php
                     $mindmapCount = Auth::user()->mindmaps->count();
                     $progress = min(100, round(($mindmapCount / 100) * 100));
                 @endphp
 
                 <x-profile.stat icon="user" label="Nama" value="{{ Auth::user()->name }}" color="primary" />
-                <x-profile.stat icon="mail" label="Email" value="{{ Auth::user()->email }}" color="blue-500" />
-                <x-profile.stat icon="shield-check" label="Peran" value="{{ Auth::user()->role }}" color="green-500" />
+
+                <x-profile.stat icon="mail" label="Email" value="{{ Auth::user()->email }}" color="secondary" />
+
+                <x-profile.stat icon="shield-check" label="Peran" value="{{ Auth::user()->role }}" color="success" />
+
                 <x-profile.stat icon="folder" label="Mindmap" value="{{ Auth::user()->mindmaps->count() }}"
-                    color="purple-500" />
+                    color="warning" />
 
-            </div>
+                <x-profile.stat icon="graduation-cap" label="Tipe Akun" value="{{ Auth::user()->account_type }}"
+                    color="danger" />
 
-            {{-- Progress Mindmap --}}
-            <div class="bg-white p-4 shadow rounded-lg">
-                <div class="mb-2 text-sm font-medium text-gray-700">Progress Pembuatan Mindmap (max: 100)</div>
-                <progress class="progress progress-primary w-full" value="{{ $progress }}"
-                    max="100"></progress>
-                <div class="text-right text-sm text-gray-500 mt-1">{{ $progress }}%</div>
+
             </div>
 
             {{-- QR & Login Info --}}

@@ -545,8 +545,10 @@
                 icon: 'success',
                 title: 'Berhasil',
                 text: 'Mindmap berhasil disimpan!',
-                timer: 2000,
+                timer: 1500,
                 showConfirmButton: false
+            }).then(() => {
+                window.location.href = "{{ route('mindmap.saved') }}";
             });
 
             const sidebar = document.querySelector('[x-data="mindmapSidebar"]');
@@ -578,6 +580,8 @@
         }
     });
 
+    let uploadedImageBase64 = null; // simpan base64 upload
+
     function tampilkanReferensi() {
         const referensiImages = [{
                 name: 'Multi Flow',
@@ -603,41 +607,64 @@
 
         const imageOptions = referensiImages.map(img => `
         <div onclick="setPreviewImage('${img.path}')"
-             class="border rounded p-1 hover:shadow cursor-pointer transition hover:scale-105">
+            class="border rounded-lg p-2 hover:shadow-lg cursor-pointer transition hover:scale-105 bg-base-100">
             <img src="${img.path}" alt="${img.name}" class="object-contain w-20 h-20 mx-auto" />
             <div class="text-xs text-center mt-1">${img.name}</div>
         </div>
     `).join('');
 
         Swal.fire({
-            title: 'Pilih Referensi',
-            html: `<div class="grid grid-cols-2 gap-2">${imageOptions}</div>`,
+            title: 'Pilih Referensi atau Upload Gambar',
+            html: `
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                ${imageOptions}
+            </div>
+
+            <div class="divider">atau</div>
+
+            <div class="form-control w-full text-center">
+                <label class="label cursor-pointer flex flex-col items-center">
+                    <span class="btn btn-primary mb-2">📁 Upload Gambar</span>
+                    <input type="file" id="uploadImageInput" accept="image/*" class="file-input file-input-bordered w-full max-w-xs hidden">
+                </label>
+                <div id="uploadPreview" class="mt-3 hidden">
+                    <img id="uploadPreviewImg" class="w-20 h-20 object-cover mx-auto rounded-lg border">
+                </div>
+            </div>
+        `,
             showConfirmButton: false,
-            width: '600px'
+            width: '600px',
+            didOpen: () => {
+                document.querySelector('.label.cursor-pointer').addEventListener('click', () => {
+                    document.getElementById('uploadImageInput').click();
+                });
+                document.getElementById('uploadImageInput').addEventListener('change', handleImageUpload);
+            }
         });
+    }
+
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            uploadedImageBase64 = e.target.result; // simpan base64
+            document.getElementById('uploadPreviewImg').src = uploadedImageBase64;
+            document.getElementById('uploadPreview').classList.remove('hidden');
+            setPreviewImage(uploadedImageBase64);
+        };
+        reader.readAsDataURL(file);
     }
 
     function setPreviewImage(path) {
         const previewContainer = document.getElementById('preview-container');
         const previewImage = document.getElementById('preview-image');
 
-        // Set src gambar preview
         previewImage.src = path;
-
-        // Set onclick preview agar buka modal sesuai gambar
         previewContainer.setAttribute('onclick', `showImageModal('${path}')`);
-
-        // Tampilkan div preview
         previewContainer.classList.remove('hidden');
 
-        // Tutup SweetAlert
         Swal.close();
-    }
-
-    function showImageModalFromPreview() {
-        const src = document.getElementById('preview-image').src;
-        if (src) {
-            showImageModal(src);
-        }
     }
 </script>

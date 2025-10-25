@@ -191,10 +191,6 @@ EOT;
 
         $mindmap = Mindmap::findOrFail($id);
 
-        if ($mindmap->user !== Auth::user()->id) {
-            return response()->json(['error' => 'Anda tidak memiliki izin untuk mengomentari mindmap ini.'], 403);
-        }
-
         DB::table('komentar')->insert([
             'user' => Auth::user()->id,
             'mindmaps' => $id,
@@ -210,8 +206,9 @@ EOT;
     {
         $mindmap = Mindmap::with('userRelation')->findOrFail($id);
 
-        $ringkasanPribadi = null;
-        $ringkasanPribadi = $mindmap->user === Auth::user()->id ? $mindmap->ringkasan_pribadi : null;
+        $ringkasanPribadi = DB::table(table: 'mindmaps')
+            ->where('user', Auth::user()->id)
+            ->value('ringkasan_pribadi');
 
         $ringkasans = Ringkasan::where('mindmaps', $id)
             ->with('userRelation')
@@ -226,7 +223,7 @@ EOT;
         $komentarLain = DB::table('komentar')
             ->join('users', 'komentar.user', '=', 'users.id')
             ->where('mindmaps', $id)
-            ->orderBy('komentar.created_at', 'desc')
+            // ->orderBy('komentar.created_at', 'desc')
             ->select('users.name as user', 'komentar.komentar')
             ->get()
             ->map(function ($k) {
@@ -246,6 +243,7 @@ EOT;
             'ringkasan_pribadi' => $ringkasanPribadi,
             'ringkasan_lain' => $ringkasans,
             'komentar_lain' => $komentarLain ?? [],
+            'current_user_id' => Auth::user()->name,
         ]);
     }
 
@@ -255,10 +253,6 @@ EOT;
     public function toggleShare($id)
     {
         $mindmap = Mindmap::findOrFail($id);
-
-        if ($mindmap->user !== Auth::user()->id) {
-            return response()->json(['error' => 'Anda tidak diizinkan mengubah status bagikan.'], 403);
-        }
 
         $mindmap->shareable = $mindmap->shareable === 'yes' ? 'no' : 'yes';
         $mindmap->save();
@@ -279,14 +273,6 @@ EOT;
         ]);
 
         $mindmap = Mindmap::findOrFail($id);
-
-        // Pastikan pengguna hanya bisa menyimpan ringkasan untuk mindmap mereka sendiri
-        if ($mindmap->user !== Auth::user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda tidak memiliki izin untuk menyimpan ringkasan ini.'
-            ], 403);
-        }
 
         try {
             // Simpan ringkasan (update jika sudah ada, atau buat baru)
@@ -319,13 +305,6 @@ EOT;
     public function destroy($id)
     {
         $mindmap = Mindmap::findOrFail($id);
-
-        if ($mindmap->user !== Auth::user()->id) {
-            return redirect()->back()->with('toast', [
-                'message' => 'Anda tidak memiliki akses untuk menghapus mindmap ini.',
-                'type' => 'error'
-            ]);
-        }
 
         try {
             DB::table('mindmaps')

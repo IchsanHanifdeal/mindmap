@@ -100,6 +100,18 @@
                                             <x-lucide-trash-2 class="w-4 h-4" />
                                         </button>
                                     </div>
+                                    <div class="tooltip" data-tip="Catat Highlight">
+                                        <button type="button" onclick="showKataKunciModal({{ $item->id }})"
+                                            class="btn btn-sm btn-primary flex items-center gap-1">
+                                            <x-lucide-book-key class="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <div class="tooltip" data-tip="Buat Mindmap dari Materi">
+                                        <button type="button" onclick="makeMindmap({{ $item->id }})"
+                                            class="btn btn-sm bg-blue-500 flex items-center gap-1 hover:bg-blue-700">
+                                            <x-lucide-pencil-ruler class="w-4 h-4" />
+                                        </button>
+                                    </div>
 
                                     <form id="delete-form-{{ $item->id }}" method="POST"
                                         action="{{ route('materi.destroy', $item->id) }}" class="hidden">

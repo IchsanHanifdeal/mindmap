@@ -15,9 +15,17 @@
 
                 <!-- Logo -->
                 @unless (request()->is('mindmap/*'))
-                    <a href="{{ route('beranda') }}" class="btn btn-ghost text-xl font-bold text-[#123f77] gap-2">
-                        <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-8 w-auto" />
-                        Mindmapku
+                    <a href="{{ route('beranda') }}" class="btn btn-ghost gap-3 items-center p-0">
+                        <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-11 w-auto" />
+
+                        <span class="flex flex-col leading-[1.1]">
+                            <span class="text-[#0d3970] font-extrabold text-[1.2rem] tracking-wide drop-shadow-sm">
+                                Digital Mind Mapping
+                            </span>
+                            <span class="text-[#e8891a] font-semibold text-[0.85rem] tracking-wider uppercase">
+                                Opirsure
+                            </span>
+                        </span>
                     </a>
                 @endunless
 
